@@ -1,0 +1,1131 @@
+<!DOCTYPE html>
+<html lang="en">
+<head>
+<meta charset="UTF-8"/>
+<meta name="viewport" content="width=device-width, initial-scale=1.0"/>
+<title>ProofLayer — Decentralized Reputation on Solana</title>
+<meta name="description" content="ProofLayer — Build verifiable on-chain reputation. The home of Web3 contributions on Solana."/>
+<link href="https://fonts.googleapis.com/css2?family=Bebas+Neue&family=DM+Sans:wght@300;400;500;600;700&family=JetBrains+Mono:wght@400;700&display=swap" rel="stylesheet"/>
+<style>
+*{margin:0;padding:0;box-sizing:border-box}
+:root{
+  --bg:#0a0010;
+  --bg2:#110018;
+  --bg3:#1a0025;
+  --pink:#e040fb;
+  --pink2:#ce36e8;
+  --pink3:#f06fff;
+  --pink-pale:rgba(224,64,251,0.08);
+  --pink-border:rgba(224,64,251,0.2);
+  --white:#ffffff;
+  --offwhite:#f8f0ff;
+  --text:#e8dff0;
+  --muted:#9580a8;
+  --border:rgba(255,255,255,0.07);
+  --glass:rgba(255,255,255,0.04);
+  --card:rgba(17,0,24,0.8);
+}
+html{scroll-behavior:smooth}
+body{background:var(--bg);color:var(--text);font-family:'DM Sans',sans-serif;overflow-x:hidden}
+
+/* ── BUTTONS ── */
+.btn{display:inline-flex;align-items:center;gap:.5rem;padding:.7rem 1.6rem;border-radius:4px;font-family:'DM Sans',sans-serif;font-weight:700;font-size:.82rem;cursor:pointer;border:none;transition:all .22s;letter-spacing:.04em;text-transform:uppercase}
+.btn-pink{background:linear-gradient(135deg,var(--pink),var(--pink2));color:#fff;box-shadow:0 4px 20px rgba(224,64,251,0.35)}
+.btn-pink:hover{transform:translateY(-2px);box-shadow:0 8px 28px rgba(224,64,251,0.5)}
+.btn-outline{background:transparent;border:1.5px solid var(--pink-border);color:var(--pink3)}
+.btn-outline:hover{background:var(--pink-pale);border-color:var(--pink)}
+.btn-ghost{background:var(--glass);border:1px solid var(--border);color:var(--text)}
+.btn-ghost:hover{border-color:var(--pink-border);color:var(--pink3)}
+.btn-sm{padding:.42rem 1rem;font-size:.75rem}
+.btn-xs{padding:.28rem .7rem;font-size:.68rem}
+.btn-white{background:#fff;color:var(--bg)}
+.btn-white:hover{background:var(--offwhite)}
+
+/* ── NAV ── */
+nav{position:fixed;top:0;left:0;right:0;z-index:100;display:flex;align-items:center;justify-content:space-between;padding:.9rem 2rem;background:rgba(10,0,16,0.92);backdrop-filter:blur(24px);border-bottom:1px solid var(--border)}
+.logo{font-family:'Bebas Neue',sans-serif;font-size:1.6rem;letter-spacing:.06em;background:linear-gradient(135deg,var(--pink),var(--pink3));-webkit-background-clip:text;-webkit-text-fill-color:transparent}
+.nav-mid{display:flex;gap:1.75rem}
+.nl{font-size:.82rem;font-weight:500;color:var(--muted);cursor:pointer;transition:color .2s}.nl:hover{color:var(--pink3)}
+.nav-r{display:flex;align-items:center;gap:.75rem}
+
+/* ── HERO ── */
+.hero{min-height:100vh;display:flex;flex-direction:column;align-items:center;justify-content:center;padding:8rem 2rem 5rem;position:relative;overflow:hidden;text-align:center}
+.hero-bg{position:absolute;inset:0;z-index:0}
+.hero-glow1{position:absolute;width:700px;height:700px;background:radial-gradient(circle,rgba(224,64,251,0.18),transparent 65%);top:-200px;right:-100px;pointer-events:none}
+.hero-glow2{position:absolute;width:500px;height:500px;background:radial-gradient(circle,rgba(160,32,196,0.12),transparent 65%);bottom:-100px;left:-100px;pointer-events:none}
+.hero-grid{position:absolute;inset:0;background-image:linear-gradient(rgba(224,64,251,0.06) 1px,transparent 1px),linear-gradient(90deg,rgba(224,64,251,0.06) 1px,transparent 1px);background-size:55px 55px}
+.hero-inner{position:relative;z-index:1;max-width:880px}
+.hero-pill{display:inline-flex;align-items:center;gap:.5rem;background:rgba(224,64,251,0.12);border:1px solid var(--pink-border);color:var(--pink3);padding:.35rem 1rem;font-size:.68rem;font-weight:700;letter-spacing:.15em;text-transform:uppercase;margin-bottom:2rem;border-radius:20px}
+.pill-dot{width:6px;height:6px;background:var(--pink);border-radius:50%;animation:blink 1.6s infinite}
+@keyframes blink{0%,100%{opacity:1}50%{opacity:.2}}
+.hero-h1{font-family:'Bebas Neue',sans-serif;font-size:clamp(3.5rem,11vw,8rem);line-height:.88;color:#fff}
+.hero-h1 em{display:block;font-style:normal;background:linear-gradient(135deg,var(--pink),var(--pink3));-webkit-background-clip:text;-webkit-text-fill-color:transparent}
+.hero-p{font-size:clamp(.92rem,2vw,1.08rem);color:var(--muted);max-width:560px;margin:2rem auto;line-height:1.82;font-weight:300}
+.hero-p strong{color:var(--text);font-weight:600}
+.hero-acts{display:flex;gap:1rem;justify-content:center;flex-wrap:wrap;margin-top:2.5rem}
+.hero-trust{display:flex;align-items:center;gap:1rem;justify-content:center;margin-top:2.5rem;flex-wrap:wrap}
+.trust-avas{display:flex}
+.tav{width:32px;height:32px;border-radius:50%;border:2px solid var(--bg);margin-left:-8px;font-size:.7rem;font-weight:800;display:flex;align-items:center;justify-content:center;color:#fff}
+.tav:first-child{margin-left:0}
+.trust-txt{font-size:.8rem;color:var(--muted)}.trust-txt strong{color:var(--text)}
+.hero-stats{display:flex;gap:3rem;justify-content:center;margin-top:3.5rem;flex-wrap:wrap}
+.hstat-n{font-family:'Bebas Neue',sans-serif;font-size:2.8rem;background:linear-gradient(135deg,var(--pink),var(--pink3));-webkit-background-clip:text;-webkit-text-fill-color:transparent;display:block;line-height:1}
+.hstat-l{font-size:.68rem;color:var(--muted);text-transform:uppercase;letter-spacing:.14em;margin-top:2px}
+.scroll-hint{position:absolute;bottom:2rem;left:50%;transform:translateX(-50%);display:flex;flex-direction:column;align-items:center;gap:.4rem}
+.scroll-hint-line{width:1px;height:48px;background:linear-gradient(to bottom,var(--pink),transparent);animation:scrollp 2s infinite}
+.scroll-hint-txt{font-size:.6rem;letter-spacing:.18em;text-transform:uppercase;color:var(--muted)}
+@keyframes scrollp{0%{transform:scaleY(0);transform-origin:top}50%{transform:scaleY(1);transform-origin:top}51%{transform:scaleY(1);transform-origin:bottom}100%{transform:scaleY(0);transform-origin:bottom}}
+
+/* ── TICKER ── */
+.ticker-wrap{background:linear-gradient(135deg,#1a002a,#0d0018);padding:.65rem 0;overflow:hidden;white-space:nowrap;border-top:1px solid var(--pink-border);border-bottom:1px solid var(--pink-border)}
+.ticker-inner{display:inline-flex;animation:tick 32s linear infinite}
+.ti{display:inline-flex;align-items:center;gap:1rem;padding:0 2rem;font-family:'Bebas Neue',sans-serif;font-size:1rem;letter-spacing:.08em;color:var(--pink3)}
+.ts{color:var(--pink-border)}
+@keyframes tick{to{transform:translateX(-50%)}}
+
+/* ── CARDS & SECTIONS ── */
+.section{padding:7rem 2rem}
+.sec-inner{max-width:1100px;margin:0 auto}
+.sec-k{font-size:.68rem;letter-spacing:.2em;text-transform:uppercase;color:var(--pink);font-weight:700;margin-bottom:.75rem;display:flex;align-items:center;gap:.5rem}
+.sec-k::before{content:'';width:20px;height:1.5px;background:var(--pink)}
+.sec-h{font-family:'Bebas Neue',sans-serif;font-size:clamp(2rem,5vw,3.5rem);line-height:.95;color:#fff}
+.sec-p{color:var(--muted);font-size:.9rem;line-height:1.8;margin-top:.75rem;font-weight:300}
+
+.card{background:var(--card);border:1px solid var(--border);border-radius:8px;backdrop-filter:blur(16px)}
+.card-glow{border-color:var(--pink-border);background:linear-gradient(135deg,rgba(224,64,251,0.06),var(--card))}
+
+/* ── FEATURE CARDS ── */
+.feat-grid{display:grid;grid-template-columns:repeat(auto-fit,minmax(220px,1fr));gap:1px;background:var(--border);margin-top:3rem}
+.feat-card{background:var(--bg2);padding:2.5rem 2rem;position:relative;overflow:hidden;transition:background .3s}
+.feat-card::after{content:'';position:absolute;bottom:0;left:0;right:0;height:2px;background:linear-gradient(90deg,var(--pink),var(--pink3));transform:scaleX(0);transform-origin:left;transition:transform .4s}
+.feat-card:hover{background:rgba(224,64,251,0.05)}
+.feat-card:hover::after{transform:scaleX(1)}
+.fc-num{font-family:'Bebas Neue',sans-serif;font-size:2.5rem;color:rgba(224,64,251,0.12);line-height:1;margin-bottom:.4rem}
+.fc-icon{font-size:1.8rem;margin-bottom:1rem;display:block}
+.fc-h{font-family:'Bebas Neue',sans-serif;font-size:1.25rem;color:#fff;margin-bottom:.6rem;letter-spacing:.04em}
+.fc-p{font-size:.8rem;color:var(--muted);line-height:1.75}
+.fc-pts{display:inline-block;margin-top:1rem;font-family:'JetBrains Mono',monospace;font-size:.68rem;color:var(--pink);border:1px solid var(--pink-border);padding:.22rem .6rem;background:var(--pink-pale);border-radius:3px}
+
+/* ── LEADERBOARD ── */
+.lb-wrap{border:1px solid var(--border);border-radius:8px;overflow:hidden;margin-top:2.5rem}
+.lb-head{display:grid;grid-template-columns:60px 1fr 100px 160px;gap:1rem;padding:.8rem 1.5rem;background:rgba(224,64,251,0.06);border-bottom:1px solid var(--border);font-size:.67rem;font-weight:700;letter-spacing:.12em;text-transform:uppercase;color:var(--muted)}
+.lb-row{display:grid;grid-template-columns:60px 1fr 100px 160px;gap:1rem;padding:1rem 1.5rem;border-bottom:1px solid var(--border);align-items:center;background:var(--bg2);transition:background .2s;cursor:pointer}
+.lb-row:hover{background:rgba(224,64,251,0.06)}
+.lb-row:last-child{border-bottom:none}
+.lb-rn{font-family:'Bebas Neue',sans-serif;font-size:1.5rem;color:rgba(255,255,255,.15)}
+.lb-rn.g{background:linear-gradient(135deg,var(--pink),var(--pink3));-webkit-background-clip:text;-webkit-text-fill-color:transparent}
+.lb-rn.s{color:#94a3b8}.lb-rn.b{color:#cd7f32}
+.lb-ui{display:flex;align-items:center;gap:.75rem}
+.lb-av{width:38px;height:38px;border-radius:6px;display:flex;align-items:center;justify-content:center;font-weight:800;font-size:.8rem;color:#fff;flex-shrink:0;font-family:'JetBrains Mono',monospace}
+.lb-nm{font-weight:700;font-size:.875rem;color:#fff}
+.lb-wl{font-size:.67rem;color:var(--muted);font-family:'JetBrains Mono',monospace;margin-top:1px}
+.lb-sc{font-family:'Bebas Neue',sans-serif;font-size:1.5rem;background:linear-gradient(135deg,var(--pink),var(--pink3));-webkit-background-clip:text;-webkit-text-fill-color:transparent}
+.lb-bd{display:flex;gap:3px;flex-wrap:wrap}
+.chip{display:inline-block;padding:2px 7px;background:var(--pink-pale);border:1px solid var(--pink-border);font-size:.6rem;font-weight:700;color:var(--pink3);letter-spacing:.05em;text-transform:uppercase;border-radius:3px}
+.lb-empty{text-align:center;padding:3rem;color:var(--muted);font-size:.88rem}
+
+/* ── TOAST ── */
+.toast{position:fixed;bottom:2rem;right:2rem;background:var(--bg3);color:var(--text);padding:.9rem 1.4rem;font-size:.84rem;font-weight:500;z-index:9999;transform:translateY(130%);transition:transform .4s cubic-bezier(.34,1.56,.64,1);max-width:310px;border-left:3px solid var(--pink);border-radius:6px;border:1px solid var(--pink-border);border-left:3px solid var(--pink)}
+.toast.on{transform:translateY(0)}
+
+/* ── CONNECTING MODAL ── */
+.connecting{position:fixed;inset:0;background:rgba(10,0,16,.92);backdrop-filter:blur(16px);z-index:200;display:none;flex-direction:column;align-items:center;justify-content:center;gap:1.5rem}
+.connecting.on{display:flex}
+.conn-ring{width:56px;height:56px;border:3px solid var(--pink-border);border-top-color:var(--pink);border-radius:50%;animation:spin .8s linear infinite}
+@keyframes spin{to{transform:rotate(360deg)}}
+.conn-logo{font-family:'Bebas Neue',sans-serif;font-size:2rem;letter-spacing:.08em;background:linear-gradient(135deg,var(--pink),var(--pink3));-webkit-background-clip:text;-webkit-text-fill-color:transparent}
+
+/* ── MODALS ── */
+.modal-bg{position:fixed;inset:0;background:rgba(0,0,0,.75);z-index:300;display:none;align-items:center;justify-content:center;padding:1rem}
+.modal-bg.on{display:flex}
+.modal{background:var(--bg2);border:1px solid var(--border);border-radius:10px;width:100%;max-width:500px;max-height:90vh;overflow-y:auto}
+.modal-head{padding:1.2rem 1.5rem;border-bottom:1px solid var(--border);display:flex;align-items:center;justify-content:space-between}
+.modal-title{font-family:'Bebas Neue',sans-serif;font-size:1.35rem;color:#fff;letter-spacing:.05em}
+.modal-close{font-size:1.4rem;cursor:pointer;color:var(--muted);background:none;border:none;line-height:1;transition:color .2s}.modal-close:hover{color:var(--pink3)}
+.modal-body{padding:1.5rem}
+
+/* ── INPUTS ── */
+.fg{display:flex;flex-direction:column;gap:5px;margin-bottom:1rem}
+label{font-size:.67rem;font-weight:700;color:var(--muted);text-transform:uppercase;letter-spacing:.1em}
+input,select,textarea{background:rgba(255,255,255,.05);border:1px solid var(--border);border-radius:5px;padding:.65rem 1rem;color:var(--text);font-family:'DM Sans',sans-serif;font-size:.875rem;width:100%;transition:border-color .2s}
+input:focus,select:focus,textarea:focus{outline:none;border-color:var(--pink);background:rgba(224,64,251,0.06)}
+select option{background:var(--bg2);color:var(--text)}
+textarea{resize:vertical;min-height:80px}
+
+/* ════════════════════════════════
+   DASHBOARD
+════════════════════════════════ */
+.dash{display:none;min-height:100vh;background:var(--bg);padding-top:62px}
+.dash.on{display:block}
+
+/* BOTTOM NAV */
+.bnav{position:fixed;bottom:0;left:0;right:0;background:rgba(10,0,16,.95);border-top:1px solid var(--border);display:none;z-index:99;backdrop-filter:blur(20px)}
+.bnav.on{display:flex}
+.bnav-inner{display:flex;width:100%}
+.bni{display:flex;flex-direction:column;align-items:center;gap:2px;font-size:.6rem;font-weight:700;color:var(--muted);cursor:pointer;padding:.6rem .75rem;transition:color .2s;text-transform:uppercase;letter-spacing:.07em;flex:1}
+.bni.on,.bni:hover{color:var(--pink3)}
+.bni-icon{font-size:1.25rem}
+
+/* PAGES */
+.page{display:none;padding:1.5rem;max-width:680px;margin:0 auto;padding-bottom:85px}
+.page.on{display:block}
+
+/* ── FEED ── */
+.feed-top{display:flex;justify-content:space-between;align-items:center;margin-bottom:1.25rem}
+.feed-title{font-family:'Bebas Neue',sans-serif;font-size:1.7rem;color:#fff;letter-spacing:.05em}
+.post-card{background:var(--card);border:1px solid var(--border);border-radius:8px;margin-bottom:.9rem;transition:border-color .25s;overflow:hidden}
+.post-card:hover{border-color:var(--pink-border)}
+.post-top{display:flex;align-items:center;gap:.75rem;padding:.9rem 1.1rem .65rem}
+.post-av{width:38px;height:38px;border-radius:6px;display:flex;align-items:center;justify-content:center;font-weight:800;font-size:.8rem;color:#fff;flex-shrink:0;font-family:'JetBrains Mono',monospace}
+.post-uname{font-weight:700;font-size:.85rem;color:#fff;cursor:pointer;transition:color .2s}.post-uname:hover{color:var(--pink3)}
+.post-time{font-size:.67rem;color:var(--muted);margin-top:1px}
+.post-type-tag{display:inline-flex;align-items:center;gap:3px;padding:2px 9px;background:var(--pink-pale);border:1px solid var(--pink-border);font-size:.6rem;font-weight:700;color:var(--pink3);text-transform:uppercase;border-radius:3px;margin-left:auto;flex-shrink:0}
+.verified-tag{display:inline-flex;align-items:center;gap:2px;font-size:.6rem;color:#4ade80;font-weight:700}
+.post-body{padding:.1rem 1.1rem .9rem}
+.post-title{font-weight:700;font-size:.88rem;color:#fff;margin-bottom:.3rem}
+.post-desc{font-size:.8rem;color:var(--muted);line-height:1.65;margin-bottom:.4rem}
+.post-link{display:inline-flex;align-items:center;gap:.3rem;font-size:.75rem;color:var(--pink3);font-weight:600;text-decoration:none;transition:color .2s}.post-link:hover{color:var(--pink)}
+.post-pts{font-family:'Bebas Neue',sans-serif;font-size:.95rem;color:var(--pink);padding:0 1.1rem .5rem;letter-spacing:.05em}
+.post-acts{display:flex;border-top:1px solid var(--border)}
+.post-act{flex:1;display:flex;align-items:center;justify-content:center;gap:.35rem;padding:.6rem;font-size:.75rem;font-weight:600;color:var(--muted);cursor:pointer;transition:all .2s;border:none;background:none;font-family:'DM Sans',sans-serif}
+.post-act:hover{background:var(--pink-pale);color:var(--pink3)}
+.post-act.liked{color:var(--pink)}
+.comments-wrap{background:rgba(0,0,0,.25);border-top:1px solid var(--border);padding:.75rem 1.1rem;display:none}
+.comments-wrap.on{display:block}
+.comment{display:flex;gap:.5rem;margin-bottom:.5rem}
+.c-av{width:24px;height:24px;border-radius:4px;background:var(--pink);display:flex;align-items:center;justify-content:center;font-size:.58rem;font-weight:800;color:#fff;flex-shrink:0}
+.c-body{background:var(--bg3);border:1px solid var(--border);padding:.35rem .65rem;flex:1;border-radius:5px}
+.c-name{font-size:.68rem;font-weight:700;color:var(--pink3)}
+.c-text{font-size:.77rem;color:var(--muted);line-height:1.5}
+.c-input{display:flex;gap:.5rem;margin-top:.5rem}
+.c-input input{font-size:.8rem;border-radius:20px;padding:.42rem .85rem}
+
+/* ── PROFILE HERO ── */
+.p-hero{background:linear-gradient(135deg,var(--bg3),var(--bg2));border-bottom:1px solid var(--border);padding:2rem 1.5rem 1.5rem;position:relative;overflow:hidden}
+.p-hero::before{content:'';position:absolute;top:-60px;right:-60px;width:250px;height:250px;background:radial-gradient(circle,rgba(224,64,251,0.2),transparent 70%);pointer-events:none}
+.p-big-av{width:72px;height:72px;border-radius:8px;display:flex;align-items:center;justify-content:center;font-family:'Bebas Neue',sans-serif;font-size:1.8rem;color:#fff;border:2px solid var(--pink-border);margin-bottom:1rem;position:relative;z-index:1}
+.p-name{font-family:'Bebas Neue',sans-serif;font-size:1.75rem;color:#fff;letter-spacing:.05em;position:relative;z-index:1}
+.p-wlt{font-family:'JetBrains Mono',monospace;font-size:.68rem;color:var(--muted);position:relative;z-index:1}
+.p-bio{font-size:.83rem;color:var(--muted);margin-top:.5rem;line-height:1.65;position:relative;z-index:1}
+.p-handles{display:flex;gap:.5rem;flex-wrap:wrap;margin-top:.65rem;position:relative;z-index:1}
+.handle{display:inline-flex;align-items:center;gap:.3rem;padding:.28rem .7rem;background:rgba(224,64,251,0.08);border:1px solid var(--pink-border);font-size:.73rem;color:var(--pink3);border-radius:4px}
+.p-stats{display:flex;gap:2rem;margin-top:1.1rem;position:relative;z-index:1}
+.p-stat-v{font-family:'Bebas Neue',sans-serif;font-size:2rem;background:linear-gradient(135deg,var(--pink),var(--pink3));-webkit-background-clip:text;-webkit-text-fill-color:transparent;display:block;line-height:1}
+.p-stat-l{font-size:.63rem;color:var(--muted);text-transform:uppercase;letter-spacing:.1em}
+.p-actions{display:flex;gap:.5rem;margin-top:1.1rem;position:relative;z-index:1}
+
+/* TABS */
+.ptabs{display:flex;border-bottom:1px solid var(--border);margin-bottom:1.25rem}
+.ptab{padding:.55rem 1.1rem;font-size:.78rem;font-weight:700;cursor:pointer;color:var(--muted);border-bottom:2px solid transparent;margin-bottom:-1px;text-transform:uppercase;letter-spacing:.08em;transition:all .2s}
+.ptab.on{color:var(--pink3);border-bottom-color:var(--pink)}
+
+/* SHARE BOX */
+.share-box{background:var(--pink-pale);border:1px solid var(--pink-border);padding:.9rem 1.1rem;border-radius:6px;display:flex;align-items:center;gap:.75rem;margin-bottom:1rem}
+.share-url{font-family:'JetBrains Mono',monospace;font-size:.68rem;color:var(--text);flex:1;word-break:break-all}
+
+/* SUBMIT CARD */
+.sub-card{background:var(--card);border:1px solid var(--border);border-radius:8px;padding:1.5rem;margin-bottom:1rem}
+.sub-title{font-family:'Bebas Neue',sans-serif;font-size:1.6rem;color:#fff;letter-spacing:.05em;margin-bottom:1.25rem}
+
+/* MINI STATS */
+.mstats{display:grid;grid-template-columns:repeat(2,1fr);gap:1rem;margin-bottom:1.5rem}
+.ms{background:var(--card);border:1px solid var(--border);border-radius:8px;padding:1.1rem;text-align:center;transition:border-color .2s}.ms:hover{border-color:var(--pink-border)}
+.ms-v{font-family:'Bebas Neue',sans-serif;font-size:2rem;background:linear-gradient(135deg,var(--pink),var(--pink3));-webkit-background-clip:text;-webkit-text-fill-color:transparent;line-height:1}
+.ms-l{font-size:.67rem;color:var(--muted);text-transform:uppercase;letter-spacing:.1em;margin-top:2px}
+
+/* BADGE GRID */
+.bg-grid{display:grid;grid-template-columns:repeat(auto-fill,minmax(130px,1fr));gap:.75rem}
+.b-card{background:var(--card);border:1px solid var(--border);border-radius:6px;padding:.9rem;text-align:center;transition:border-color .2s}.b-card:hover{border-color:var(--pink-border)}
+.b-em{font-size:1.9rem;display:block;margin-bottom:.35rem}
+.b-nm{font-weight:700;font-size:.78rem;color:#fff}
+.b-desc{font-size:.68rem;color:var(--muted);margin-top:1px;line-height:1.4}
+
+/* MESSAGES */
+.msg-item{display:flex;align-items:center;gap:.75rem;padding:.85rem 1.1rem;border-bottom:1px solid var(--border);cursor:pointer;transition:background .2s;border-radius:6px}
+.msg-item:hover{background:var(--pink-pale)}
+.msg-av{width:40px;height:40px;border-radius:6px;display:flex;align-items:center;justify-content:center;font-weight:800;font-size:.82rem;color:#fff;flex-shrink:0}
+.msg-nm{font-weight:700;font-size:.85rem;color:#fff}
+.msg-prev{font-size:.73rem;color:var(--muted);white-space:nowrap;overflow:hidden;text-overflow:ellipsis;max-width:180px}
+.msg-time{font-size:.63rem;color:var(--muted)}
+
+/* CHAT */
+.chat-win{position:fixed;inset:0;top:62px;bottom:62px;background:var(--bg);z-index:50;display:none;flex-direction:column}
+.chat-win.on{display:flex}
+.chat-head{display:flex;align-items:center;gap:.75rem;padding:.9rem 1.1rem;border-bottom:1px solid var(--border);background:var(--bg2)}
+.chat-back{font-size:1.2rem;cursor:pointer;color:var(--muted);background:none;border:none;padding:.2rem;transition:color .2s}.chat-back:hover{color:var(--pink3)}
+.chat-msgs{flex:1;overflow-y:auto;padding:1rem;display:flex;flex-direction:column;gap:.5rem;background:var(--bg)}
+.bubble{max-width:75%;padding:.55rem .85rem;border-radius:6px;font-size:.84rem;line-height:1.55}
+.b-out{background:linear-gradient(135deg,var(--pink),var(--pink2));color:#fff;align-self:flex-end;border-bottom-right-radius:2px}
+.b-in{background:var(--bg3);color:var(--text);align-self:flex-start;border:1px solid var(--border);border-bottom-left-radius:2px}
+.b-time{font-size:.6rem;opacity:.6;margin-top:2px}
+.chat-inp{display:flex;gap:.5rem;padding:.7rem 1rem;border-top:1px solid var(--border);background:var(--bg2)}
+.chat-inp input{flex:1;border-radius:20px;padding:.55rem 1rem}
+
+/* PUBLIC PROFILE */
+.pub-prof{min-height:100vh;background:var(--bg);padding-top:62px;display:none}
+
+/* LB FILTERS */
+.lb-filters{display:flex;gap:.4rem;flex-wrap:wrap;margin-bottom:1.25rem}
+.lf{padding:.35rem .85rem;font-size:.72rem;font-weight:700;border:1px solid var(--border);background:transparent;color:var(--muted);cursor:pointer;font-family:'DM Sans',sans-serif;letter-spacing:.06em;text-transform:uppercase;transition:all .2s;border-radius:4px}
+.lf.on{border-color:var(--pink);color:var(--pink3);background:var(--pink-pale)}
+
+/* ANIMATIONS */
+.reveal{opacity:0;transform:translateY(22px);transition:opacity .65s,transform .65s}
+.reveal.vis{opacity:1;transform:translateY(0)}
+
+/* CTA STRIP */
+.cta-strip{background:linear-gradient(135deg,#1a002a,#0d0018);padding:7rem 2rem;text-align:center;position:relative;overflow:hidden;border-top:1px solid var(--pink-border)}
+.cta-strip::before{content:'PROOF';position:absolute;top:50%;left:50%;transform:translate(-50%,-50%);font-family:'Bebas Neue',sans-serif;font-size:16rem;color:rgba(224,64,251,0.05);pointer-events:none;white-space:nowrap;letter-spacing:.05em}
+
+/* SCROLLBAR */
+::-webkit-scrollbar{width:4px}::-webkit-scrollbar-thumb{background:var(--pink);border-radius:4px}
+
+/* RESPONSIVE */
+@media(max-width:768px){
+  nav{padding:.8rem 1.25rem}.nav-mid{display:none}
+  .lb-head,.lb-row{grid-template-columns:50px 1fr 80px}.lb-head>:last-child,.lb-row>:last-child{display:none}
+  .section{padding:5rem 1.5rem}
+}
+</style>
+</head>
+<body>
+
+<!-- CONNECTING MODAL — clean, no debug text -->
+<div class="connecting" id="conn">
+  <div class="conn-ring"></div>
+  <div class="conn-logo">ProofLayer</div>
+</div>
+
+<!-- TOAST -->
+<div class="toast" id="toast"></div>
+
+<!-- NAV -->
+<nav>
+  <div class="logo">ProofLayer</div>
+  <div class="nav-mid" id="navMid">
+    <span class="nl" onclick="goto('#features')">Features</span>
+    <span class="nl" onclick="goto('#leaderboard')">Leaderboard</span>
+    <span class="nl" onclick="goto('#how')">How It Works</span>
+  </div>
+  <div class="nav-r" id="navR">
+    <button class="btn btn-pink" onclick="connectWallet()">🔮 Connect Wallet</button>
+  </div>
+</nav>
+
+<!-- ══════════════ LANDING ══════════════ -->
+<div id="landing">
+
+<section class="hero">
+  <div class="hero-bg">
+    <div class="hero-grid"></div>
+    <div class="hero-glow1"></div>
+    <div class="hero-glow2"></div>
+  </div>
+  <div class="hero-inner">
+    <div class="hero-pill"><span class="pill-dot"></span>Live on Solana · The Home of Web3 Proof</div>
+    <h1 class="hero-h1">Your Work.<br>Your Proof.
+      <em>Your Reputation.</em>
+    </h1>
+    <p class="hero-p">ProofLayer is the <strong>decentralized contribution layer</strong> for Web3 builders. Log your threads, code, designs and DAO votes. Build a verifiable on-chain reputation. <strong>Get discovered. Get hired. Get recognised.</strong></p>
+    <div class="hero-acts">
+      <button class="btn btn-pink" onclick="connectWallet()">🔮 Connect Phantom Wallet</button>
+      <button class="btn btn-outline" onclick="goto('#leaderboard')">View Leaderboard</button>
+    </div>
+    <div class="hero-trust">
+      <div class="trust-avas">
+        <div class="tav" style="background:#e040fb">AB</div>
+        <div class="tav" style="background:#9c27b0">DQ</div>
+        <div class="tav" style="background:#7b1fa2">SD</div>
+        <div class="tav" style="background:#6a1b9a">CK</div>
+        <div class="tav" style="background:#4a148c">+</div>
+      </div>
+      <div class="trust-txt"><strong>2,400+ contributors</strong> already building their reputation</div>
+    </div>
+    <div class="hero-stats">
+      <div><span class="hstat-n" data-target="2400">0</span><div class="hstat-l">Contributors</div></div>
+      <div><span class="hstat-n" data-target="18400">0</span><div class="hstat-l">Contributions</div></div>
+      <div><span class="hstat-n" data-target="340">0</span><div class="hstat-l">DAOs Tracked</div></div>
+    </div>
+  </div>
+  <div class="scroll-hint"><div class="scroll-hint-txt">Scroll</div><div class="scroll-hint-line"></div></div>
+</section>
+
+<!-- TICKER -->
+<div class="ticker-wrap">
+  <div class="ticker-inner" id="ticker">
+    <span class="ti">⚡ Thread Contributions <span class="ts">✦</span></span>
+    <span class="ti">🏆 Live Leaderboard <span class="ts">✦</span></span>
+    <span class="ti">🔮 Phantom Wallet Auth <span class="ts">✦</span></span>
+    <span class="ti">🏅 On-Chain Badges <span class="ts">✦</span></span>
+    <span class="ti">💬 Builder Messaging <span class="ts">✦</span></span>
+    <span class="ti">🏛️ DAO Participation <span class="ts">✦</span></span>
+    <span class="ti">🎨 Design Tracking <span class="ts">✦</span></span>
+    <span class="ti">💻 Code Contributions <span class="ts">✦</span></span>
+    <span class="ti">🔗 Shareable Profiles <span class="ts">✦</span></span>
+    <span class="ti">🌐 Built on Solana <span class="ts">✦</span></span>
+    <span class="ti">⚡ Thread Contributions <span class="ts">✦</span></span>
+    <span class="ti">🏆 Live Leaderboard <span class="ts">✦</span></span>
+    <span class="ti">🔮 Phantom Wallet Auth <span class="ts">✦</span></span>
+    <span class="ti">🏅 On-Chain Badges <span class="ts">✦</span></span>
+    <span class="ti">💬 Builder Messaging <span class="ts">✦</span></span>
+    <span class="ti">🏛️ DAO Participation <span class="ts">✦</span></span>
+    <span class="ti">🎨 Design Tracking <span class="ts">✦</span></span>
+    <span class="ti">💻 Code Contributions <span class="ts">✦</span></span>
+    <span class="ti">🔗 Shareable Profiles <span class="ts">✦</span></span>
+    <span class="ti">🌐 Built on Solana <span class="ts">✦</span></span>
+  </div>
+</div>
+
+<!-- FEATURES -->
+<section class="section" id="features" style="background:var(--bg2)">
+  <div class="sec-inner">
+    <div class="sec-k reveal">What ProofLayer Does</div>
+    <h2 class="sec-h reveal">The Contribution Layer<br>Web3 Has Been Missing</h2>
+    <p class="sec-p reveal" style="max-width:520px">Every thread you write, every line of code you ship, every DAO you govern — logged, verified and owned by you. Forever.</p>
+    <div class="feat-grid">
+      <div class="feat-card reveal"><div class="fc-num">01</div><span class="fc-icon">🔗</span><div class="fc-h">Shareable Profiles</div><div class="fc-p">Every user gets a public profile link. Share it with DAOs and recruiters. They see your full verified contribution history instantly — no screenshots needed.</div></div>
+      <div class="feat-card reveal"><div class="fc-num">02</div><span class="fc-icon">🏠</span><div class="fc-h">Live Feed</div><div class="fc-p">A social feed of contributions from all builders. Like, comment, and discover what the community is building across the Solana ecosystem in real time.</div></div>
+      <div class="feat-card reveal"><div class="fc-num">03</div><span class="fc-icon">💬</span><div class="fc-h">Builder Messaging</div><div class="fc-p">Direct message any contributor. DAOs reach out to builders. Developers connect with designers. Networking built right into your reputation layer.</div></div>
+      <div class="feat-card reveal"><div class="fc-num">04</div><span class="fc-icon">✍️</span><div class="fc-h">Thread +10pts</div><div class="fc-p">Log educational threads, blog posts and X content with proof links. Every piece of content you create gets on-chain credit.</div><span class="fc-pts">+10 PTS EACH</span></div>
+      <div class="feat-card reveal"><div class="fc-num">05</div><span class="fc-icon">💻</span><div class="fc-h">Code +20pts</div><div class="fc-p">GitHub PRs, open source commits, smart contracts and Anchor programs. Code is the highest value contribution and earns the most points.</div><span class="fc-pts">+20 PTS EACH</span></div>
+      <div class="feat-card reveal"><div class="fc-num">06</div><span class="fc-icon">🎨</span><div class="fc-h">Design +15pts</div><div class="fc-p">UI/UX, branding, motion design, NFT art and Figma files. Designers are finally recognised as first-class contributors.</div><span class="fc-pts">+15 PTS EACH</span></div>
+    </div>
+  </div>
+</section>
+
+<!-- HOW IT WORKS -->
+<section class="section" id="how">
+  <div class="sec-inner" style="text-align:center;max-width:800px;margin:0 auto">
+    <div class="sec-k reveal" style="justify-content:center">Simple Process</div>
+    <h2 class="sec-h reveal">Zero to Reputation in 3 Steps</h2>
+    <div style="display:grid;grid-template-columns:repeat(auto-fit,minmax(200px,1fr));gap:2.5rem;margin-top:3.5rem">
+      <div class="reveal">
+        <div style="width:64px;height:64px;background:linear-gradient(135deg,var(--pink),var(--pink2));border-radius:50%;display:flex;align-items:center;justify-content:center;font-family:'Bebas Neue',sans-serif;font-size:1.7rem;color:#fff;margin:0 auto 1.5rem;box-shadow:0 0 0 8px var(--bg),0 0 0 10px var(--pink-border)">1</div>
+        <div style="font-family:'Bebas Neue',sans-serif;font-size:1.2rem;color:#fff;margin-bottom:.6rem;letter-spacing:.04em">Connect Phantom</div>
+        <div style="font-size:.83rem;color:var(--muted);line-height:1.75">Connect your Phantom wallet and sign a message to prove ownership. Your wallet address becomes your permanent ProofLayer identity.</div>
+      </div>
+      <div class="reveal">
+        <div style="width:64px;height:64px;background:linear-gradient(135deg,var(--pink),var(--pink2));border-radius:50%;display:flex;align-items:center;justify-content:center;font-family:'Bebas Neue',sans-serif;font-size:1.7rem;color:#fff;margin:0 auto 1.5rem;box-shadow:0 0 0 8px var(--bg),0 0 0 10px var(--pink-border)">2</div>
+        <div style="font-family:'Bebas Neue',sans-serif;font-size:1.2rem;color:#fff;margin-bottom:.6rem;letter-spacing:.04em">Log Contributions</div>
+        <div style="font-size:.83rem;color:var(--muted);line-height:1.75">Submit threads, code, designs, DAO votes and events with proof links. Each is verified and timestamped permanently to your wallet.</div>
+      </div>
+      <div class="reveal">
+        <div style="width:64px;height:64px;background:linear-gradient(135deg,var(--pink),var(--pink2));border-radius:50%;display:flex;align-items:center;justify-content:center;font-family:'Bebas Neue',sans-serif;font-size:1.7rem;color:#fff;margin:0 auto 1.5rem;box-shadow:0 0 0 8px var(--bg),0 0 0 10px var(--pink-border)">3</div>
+        <div style="font-family:'Bebas Neue',sans-serif;font-size:1.2rem;color:#fff;margin-bottom:.6rem;letter-spacing:.04em">Share & Get Hired</div>
+        <div style="font-size:.83rem;color:var(--muted);line-height:1.75">Share your profile link. DAOs browse the leaderboard. Message other builders directly. Your on-chain reputation works for you 24/7.</div>
+      </div>
+    </div>
+  </div>
+</section>
+
+<!-- LEADERBOARD -->
+<section class="section" id="leaderboard" style="background:var(--bg2)">
+  <div class="sec-inner">
+    <div class="sec-k reveal">Live Rankings</div>
+    <h2 class="sec-h reveal">Real Contributors.<br>Real Reputation.</h2>
+    <p class="sec-p reveal" style="max-width:480px">Every score earned through real verified contributions. No shortcuts. No fake activity. Connect your wallet to join.</p>
+    <div class="lb-wrap reveal">
+      <div class="lb-head"><div>Rank</div><div>Contributor</div><div>Score</div><div>Badges</div></div>
+      <div id="landingLb"><div class="lb-empty">Connect your wallet to see the live leaderboard.</div></div>
+    </div>
+    <div style="text-align:center;margin-top:1.75rem">
+      <button class="btn btn-pink" onclick="connectWallet()">Connect Wallet to Join →</button>
+    </div>
+  </div>
+</section>
+
+<!-- CTA -->
+<div class="cta-strip">
+  <h2 style="font-family:'Bebas Neue',sans-serif;font-size:clamp(2.5rem,7vw,5.5rem);color:#fff;line-height:.9;position:relative">Stop Building<br>in the Dark.</h2>
+  <p style="color:var(--muted);font-size:1rem;margin:2rem auto;max-width:500px;position:relative;line-height:1.75">Your contributions deserve to be seen. Your reputation deserves to be owned. Connect your wallet and start building your on-chain legacy today.</p>
+  <button class="btn btn-pink" style="font-size:.9rem;padding:.85rem 2.2rem" onclick="connectWallet()">🔮 Connect Wallet — Free</button>
+  <div style="margin-top:2rem;font-size:.72rem;color:var(--muted);letter-spacing:.12em;position:relative">NO GAS FEES · PHANTOM ONLY · BUILT ON SOLANA</div>
+</div>
+
+<footer style="background:var(--bg);padding:2.5rem 2rem;display:flex;align-items:center;justify-content:space-between;flex-wrap:wrap;gap:1rem;border-top:1px solid var(--border)">
+  <div style="font-family:'Bebas Neue',sans-serif;font-size:1.4rem;background:linear-gradient(135deg,var(--pink),var(--pink3));-webkit-background-clip:text;-webkit-text-fill-color:transparent">ProofLayer</div>
+  <div style="font-size:.72rem;color:var(--muted)">© 2025 ProofLayer · Built on Solana</div>
+</footer>
+
+</div><!-- end landing -->
+
+<!-- ══════════════ DASHBOARD ══════════════ -->
+<div class="dash" id="dashboard">
+
+  <div class="bnav" id="bnav">
+    <div class="bnav-inner">
+      <div class="bni on" id="bn-feed" onclick="showPage('feed')"><span class="bni-icon">🏠</span>Feed</div>
+      <div class="bni" id="bn-lb" onclick="showPage('lb')"><span class="bni-icon">🏆</span>Ranks</div>
+      <div class="bni" id="bn-submit" onclick="showPage('submit')"><span class="bni-icon">➕</span>Submit</div>
+      <div class="bni" id="bn-messages" onclick="showPage('messages')"><span class="bni-icon">💬</span>Messages</div>
+      <div class="bni" id="bn-me" onclick="showPage('me')"><span class="bni-icon">👤</span>Profile</div>
+    </div>
+  </div>
+
+  <!-- FEED -->
+  <div class="page on" id="page-feed">
+    <div class="feed-top">
+      <div class="feed-title">🏠 Feed</div>
+      <button class="btn btn-pink btn-sm" onclick="showPage('submit')">+ Submit</button>
+    </div>
+    <div id="feedContent"><div style="text-align:center;padding:3rem;color:var(--muted)">Loading...</div></div>
+  </div>
+
+  <!-- LEADERBOARD -->
+  <div class="page" id="page-lb">
+    <div style="font-family:'Bebas Neue',sans-serif;font-size:1.7rem;color:#fff;letter-spacing:.05em;margin-bottom:1rem">🏆 Leaderboard</div>
+    <div class="lb-filters">
+      <button class="lf on" onclick="setLbFilter('all',this)">All</button>
+      <button class="lf" onclick="setLbFilter('code',this)">Developers</button>
+      <button class="lf" onclick="setLbFilter('design',this)">Designers</button>
+      <button class="lf" onclick="setLbFilter('thread',this)">Writers</button>
+      <button class="lf" onclick="setLbFilter('dao',this)">DAO</button>
+    </div>
+    <div class="lb-wrap">
+      <div class="lb-head"><div>Rank</div><div>Contributor</div><div>Score</div><div>Badges</div></div>
+      <div id="lbContent"><div class="lb-empty">Loading...</div></div>
+    </div>
+  </div>
+
+  <!-- SUBMIT -->
+  <div class="page" id="page-submit">
+    <div style="font-family:'Bebas Neue',sans-serif;font-size:1.7rem;color:#fff;letter-spacing:.05em;margin-bottom:1.25rem">➕ Submit Contribution</div>
+    <div class="sub-card">
+      <div class="fg"><label>Title</label><input type="text" id="fTitle" placeholder="e.g. Wrote Solana staking guide on X"/></div>
+      <div class="fg"><label>Type</label>
+        <select id="fType">
+          <option value="thread">✍️ Thread / Content (+10 pts)</option>
+          <option value="design">🎨 Design / Creative (+15 pts)</option>
+          <option value="code">💻 Code / Development (+20 pts)</option>
+          <option value="dao">🏛️ DAO Participation (+10 pts)</option>
+          <option value="event">🎪 Event Attendance (+5 pts)</option>
+        </select>
+      </div>
+      <div class="fg"><label>Proof Link</label><input type="url" id="fLink" placeholder="https://..."/></div>
+      <div class="fg"><label>Description (optional)</label><textarea id="fDesc" placeholder="Brief description..."></textarea></div>
+      <button class="btn btn-pink" style="width:100%;justify-content:center" onclick="submitContrib()">🚀 Submit & Earn Points</button>
+    </div>
+  </div>
+
+  <!-- MESSAGES -->
+  <div class="page" id="page-messages">
+    <div style="font-family:'Bebas Neue',sans-serif;font-size:1.7rem;color:#fff;letter-spacing:.05em;margin-bottom:1rem">💬 Messages</div>
+    <div id="msgList"><div style="text-align:center;padding:3rem;color:var(--muted)"><div style="font-size:2rem;margin-bottom:.75rem">💬</div>No messages yet.<br><span style="font-size:.83rem">Tap a contributor in the feed or leaderboard to message them.</span></div></div>
+  </div>
+
+  <!-- MY PROFILE -->
+  <div class="page" id="page-me">
+    <div class="p-hero" id="myHero">
+      <div class="p-big-av" id="myAva" style="background:var(--pink)">?</div>
+      <div class="p-name" id="myName">—</div>
+      <div class="p-wlt" id="myWlt">—</div>
+      <div class="p-bio" id="myBio">Building reputation on Solana.</div>
+      <div class="p-handles" id="myHandles"></div>
+      <div class="p-stats">
+        <div><span class="p-stat-v" id="myScore">0</span><div class="p-stat-l">Score</div></div>
+        <div><span class="p-stat-v" id="myContribs">0</span><div class="p-stat-l">Contributions</div></div>
+        <div><span class="p-stat-v" id="myBadgeCount">0</span><div class="p-stat-l">Badges</div></div>
+      </div>
+      <div class="p-actions">
+        <button class="btn btn-pink btn-sm" onclick="openEditModal()">✏️ Edit Profile</button>
+        <button class="btn btn-ghost btn-sm" onclick="copyShareLink()">🔗 Share Profile</button>
+      </div>
+    </div>
+    <div style="padding:1.25rem 1.5rem;padding-bottom:85px">
+      <div class="share-box">
+        <div class="share-url" id="shareUrl">—</div>
+        <button class="btn btn-pink btn-xs" onclick="copyShareLink()">Copy</button>
+      </div>
+      <div class="ptabs">
+        <div class="ptab on" onclick="showPTab('contributions',this)">Contributions</div>
+        <div class="ptab" onclick="showPTab('badges',this)">Badges</div>
+      </div>
+      <div id="myContribTab"></div>
+      <div id="myBadgeTab" style="display:none"><div class="bg-grid" id="myBadgesGrid"></div></div>
+    </div>
+  </div>
+
+</div><!-- end dashboard -->
+
+<!-- CHAT WINDOW -->
+<div class="chat-win" id="chatWin">
+  <div class="chat-head">
+    <button class="chat-back" onclick="closeChat()">←</button>
+    <div class="msg-av" id="chatAv" style="background:var(--pink);width:34px;height:34px;font-size:.75rem">?</div>
+    <div><div style="font-weight:700;font-size:.85rem;color:#fff" id="chatName">—</div><div style="font-size:.67rem;color:var(--muted)" id="chatWlt">—</div></div>
+  </div>
+  <div class="chat-msgs" id="chatMsgs"><div style="text-align:center;color:var(--muted);font-size:.82rem;padding:2rem">Say hello! 👋</div></div>
+  <div class="chat-inp">
+    <input type="text" id="chatInput" placeholder="Type a message..." onkeydown="if(event.key==='Enter')sendMsg()"/>
+    <button class="btn btn-pink btn-sm" onclick="sendMsg()">Send</button>
+  </div>
+</div>
+
+<!-- PUBLIC PROFILE (shareable link) -->
+<div class="pub-prof" id="pubProf">
+  <div class="p-hero" id="pubHero">
+    <div class="p-big-av" id="pubAva" style="background:var(--pink)">?</div>
+    <div class="p-name" id="pubName">—</div>
+    <div class="p-wlt" id="pubWlt">—</div>
+    <div class="p-bio" id="pubBio">—</div>
+    <div class="p-handles" id="pubHandles"></div>
+    <div class="p-stats">
+      <div><span class="p-stat-v" id="pubScore">0</span><div class="p-stat-l">Score</div></div>
+      <div><span class="p-stat-v" id="pubC">0</span><div class="p-stat-l">Contributions</div></div>
+      <div><span class="p-stat-v" id="pubB">0</span><div class="p-stat-l">Badges</div></div>
+    </div>
+    <div class="p-actions">
+      <button class="btn btn-pink btn-sm" onclick="connectWallet()">🔮 Connect Wallet</button>
+    </div>
+  </div>
+  <div style="max-width:680px;margin:0 auto;padding:1.5rem">
+    <div style="font-family:'Bebas Neue',sans-serif;font-size:1.3rem;color:#fff;letter-spacing:.05em;margin-bottom:1rem">Contributions</div>
+    <div id="pubContribList"></div>
+  </div>
+</div>
+
+<!-- EDIT MODAL -->
+<div class="modal-bg" id="editModal">
+  <div class="modal">
+    <div class="modal-head"><div class="modal-title">Edit Profile</div><button class="modal-close" onclick="closeEditModal()">×</button></div>
+    <div class="modal-body">
+      <div class="fg"><label>Username</label><input type="text" id="eUser" placeholder="Your display name"/></div>
+      <div class="fg"><label>Bio</label><textarea id="eBio" placeholder="Tell the ecosystem who you are..."></textarea></div>
+      <div class="fg"><label>X (Twitter) Handle</label><input type="text" id="eX" placeholder="@yourhandle"/></div>
+      <div class="fg"><label>Telegram Handle</label><input type="text" id="eTg" placeholder="@yourtelegram"/></div>
+      <div class="fg"><label>GitHub Username</label><input type="text" id="eGh" placeholder="yourgithub"/></div>
+      <button class="btn btn-pink" style="width:100%;justify-content:center" onclick="saveProfile()">Save Changes</button>
+    </div>
+  </div>
+</div>
+
+<!-- VIEW PROFILE MODAL -->
+<div class="modal-bg" id="viewModal">
+  <div class="modal">
+    <div class="modal-head"><div class="modal-title" id="vmTitle">Profile</div><button class="modal-close" onclick="closeViewModal()">×</button></div>
+    <div class="modal-body" id="vmBody"></div>
+  </div>
+</div>
+
+<script>
+// ════════════ BS58 INLINE ════════════
+const bs58=(function(){
+  const A='123456789ABCDEFGHJKLMNPQRSTUVWXYZabcdefghijkmnopqrstuvwxyz',B=58,iF=Math.log(256)/Math.log(B);
+  function encode(s){
+    if(!(s instanceof Uint8Array))s=new Uint8Array(s);
+    if(!s.length)return'';
+    let z=0;while(z<s.length&&s[z]===0)z++;
+    const sz=Math.ceil((s.length-z)*iF)+1,b=new Uint8Array(sz);let l=0;
+    for(let i=z;i<s.length;i++){let c=s[i],j=0;for(let it=sz-1;c||j<l;it--,j++){c+=256*b[it];b[it]=c%B;c=Math.floor(c/B);}l=j;}
+    let it=sz-l;while(it<sz&&b[it]===0)it++;
+    return A[0].repeat(z)+[...b.slice(it)].map(x=>A[x]).join('');
+  }
+  function decode(str){
+    if(!str.length)return new Uint8Array(0);
+    let z=0;while(z<str.length&&str[z]===A[0])z++;
+    const sz=Math.ceil((str.length-z)*Math.log(B)/Math.log(256))+1,b=new Uint8Array(sz);let l=0;
+    for(let i=z;i<str.length;i++){let c=A.indexOf(str[i]);if(c<0)throw new Error('Invalid');let j=0;for(let it=sz-1;c||j<l;it--,j++){c+=B*b[it];b[it]=c%256;c=Math.floor(c/256);}l=j;}
+    let it=sz-l;while(it<sz&&b[it]===0)it++;
+    return b.slice(it-z);
+  }
+  return{encode,decode};
+})();
+
+// ════════════ CONFIG ════════════
+const API='https://prooflayer-backend.onrender.com';
+
+// ════════════ STATE ════════════
+const S={
+  wallet:'',token:'',username:'',bio:'',score:0,
+  badges:[],contributions:[],scoreBreakdown:{},
+  xHandle:'',tgHandle:'',ghHandle:'',
+  messages:{},chatWith:null,lbFilter:'all',
+};
+
+const TM={
+  thread:{emoji:'✍️',label:'Thread',pts:10,color:'#60a5fa'},
+  design:{emoji:'🎨',label:'Design',pts:15,color:'#f472b6'},
+  code:{emoji:'💻',label:'Code',pts:20,color:'#a78bfa'},
+  dao:{emoji:'🏛️',label:'DAO',pts:10,color:'#34d399'},
+  event:{emoji:'🎪',label:'Event',pts:5,color:'#fbbf24'},
+};
+
+const COLORS=['#e040fb','#9c27b0','#7b1fa2','#6a1b9a','#4a148c','#ab47bc','#ba68c8','#ce93d8'];
+const wColor=w=>COLORS[(parseInt(w?.slice(-2)||'0',16)||0)%COLORS.length];
+const shortW=w=>w?w.slice(0,4)+'...'+w.slice(-4):'—';
+const ini=n=>(n||'?').slice(0,2).toUpperCase();
+function timeAgo(d){
+  const s=Math.floor((Date.now()-new Date(d))/1000);
+  if(s<60)return'just now';if(s<3600)return Math.floor(s/60)+'m ago';
+  if(s<86400)return Math.floor(s/3600)+'h ago';return Math.floor(s/86400)+'d ago';
+}
+
+// ════════════ TOAST ════════════
+function toast(m){const t=document.getElementById('toast');t.textContent=m;t.classList.add('on');setTimeout(()=>t.classList.remove('on'),3800);}
+
+// ════════════ CONNECTING ════════════
+function showConn(on){document.getElementById('conn').classList.toggle('on',on);}
+
+// ════════════ SCROLL ════════════
+function goto(id){document.querySelector(id)?.scrollIntoView({behavior:'smooth'});}
+const obs=new IntersectionObserver(es=>es.forEach(e=>{
+  if(e.isIntersecting){e.target.classList.add('vis');e.target.querySelectorAll('[data-target]').forEach(n=>countUp(n));if(e.target.dataset?.target)countUp(e.target);}
+}),{threshold:.12});
+document.querySelectorAll('.reveal,[data-target]').forEach(el=>obs.observe(el));
+function countUp(el){
+  const t=+el.dataset.target;if(!t)return;
+  const st=performance.now(),dur=2000;
+  const go=ts=>{const p=Math.min((ts-st)/dur,1),e=1-Math.pow(1-p,4);el.textContent=Math.floor(e*t).toLocaleString();if(p<1)requestAnimationFrame(go);else el.textContent=t.toLocaleString();};
+  requestAnimationFrame(go);
+}
+document.getElementById('ticker').appendChild(document.getElementById('ticker').cloneNode(true));
+
+// Wake backend silently on load
+window.addEventListener('load',()=>{
+  fetch(API+'/health').catch(()=>{});
+  checkRoute();
+});
+
+// ════════════ WALLET CONNECT ════════════
+async function connectWallet(){
+  const provider=window.phantom?.solana??window.solana;
+  if(!provider?.isPhantom){
+    toast('Open this site inside the Phantom app browser — tap the 🌐 globe icon in Phantom');
+    return;
+  }
+  showConn(true);
+  try{
+    const conn=await provider.connect();
+    const wallet=conn.publicKey.toString();
+    const nr=await fetch(API+'/api/auth/nonce',{method:'POST',headers:{'Content-Type':'application/json'},body:JSON.stringify({walletAddress:wallet}),signal:AbortSignal.timeout(70000)});
+    const nj=await nr.json();
+    if(!nj.success)throw new Error(nj.message);
+    const signed=await provider.signMessage(new TextEncoder().encode(nj.data.message),'utf8');
+    const vr=await fetch(API+'/api/auth/verify',{method:'POST',headers:{'Content-Type':'application/json'},body:JSON.stringify({walletAddress:wallet,signature:bs58.encode(signed.signature)}),signal:AbortSignal.timeout(30000)});
+    const vj=await vr.json();
+    if(!vj.success)throw new Error(vj.message);
+    const{token,user}=vj.data;
+    S.wallet=wallet;S.token=token;
+    S.username=user.username||shortW(wallet);
+    S.score=user.reputationScore||0;S.badges=user.badges||[];
+    await loadMyData();
+    showConn(false);
+    showDash();
+    toast('Welcome back, '+S.username+'! 👋');
+  }catch(err){
+    showConn(false);
+    if(err.code===4001)toast('Connection cancelled');
+    else if(err.message?.includes('signMessage'))toast('Signature cancelled — needed to verify wallet');
+    else if(err.message?.includes('Load failed')||err.message?.includes('fetch'))toast('Connection timed out — please try again');
+    else toast('Could not connect: '+(err.message||'Please try again'));
+  }
+}
+
+function disconnectWallet(){
+  const p=window.phantom?.solana??window.solana;
+  if(p?.disconnect)p.disconnect();
+  Object.assign(S,{wallet:'',token:'',username:'',score:0,badges:[],contributions:[],messages:{}});
+  document.getElementById('dashboard').classList.remove('on');
+  document.getElementById('bnav').classList.remove('on');
+  document.getElementById('landing').style.display='block';
+  document.getElementById('navMid').style.display='';
+  document.getElementById('navR').innerHTML='<button class="btn btn-pink" onclick="connectWallet()">🔮 Connect Wallet</button>';
+  toast('Disconnected');
+}
+
+// ════════════ SHOW DASHBOARD ════════════
+function showDash(){
+  document.getElementById('landing').style.display='none';
+  document.getElementById('dashboard').classList.add('on');
+  document.getElementById('bnav').classList.add('on');
+  document.getElementById('navMid').style.display='none';
+  document.getElementById('navR').innerHTML=`
+    <span style="font-family:'JetBrains Mono',monospace;font-size:.68rem;color:var(--muted)">${shortW(S.wallet)}</span>
+    <button class="btn btn-ghost btn-sm" onclick="disconnectWallet()">Disconnect</button>`;
+  updateMyProfile();loadFeed();loadLeaderboard();
+}
+
+// ════════════ LOAD DATA ════════════
+async function loadMyData(){
+  try{
+    const h={'Authorization':'Bearer '+S.token};
+    const[cr,mr]=await Promise.all([fetch(API+'/api/contributions/my',{headers:h}),fetch(API+'/api/auth/me',{headers:h})]);
+    const cj=await cr.json(),mj=await mr.json();
+    if(cj.success)S.contributions=cj.data;
+    if(mj.success){
+      S.username=mj.data.username;S.bio=mj.data.bio||'';
+      S.score=mj.data.reputationScore;S.badges=mj.data.badges||[];
+      S.scoreBreakdown=mj.data.scoreBreakdown||{};
+      try{const x=JSON.parse(mj.data.avatar||'{}');S.xHandle=x.x||'';S.tgHandle=x.tg||'';S.ghHandle=x.gh||'';}catch(e){}
+    }
+  }catch(e){}
+}
+
+async function loadFeed(){
+  const el=document.getElementById('feedContent');
+  try{
+    const res=await fetch(API+'/api/contributions/feed?limit=50');
+    const j=await res.json();
+    const items=j.success?j.data:[];
+    if(!items.length){
+      el.innerHTML=`<div style="text-align:center;padding:3rem;color:var(--muted)"><div style="font-size:2.5rem;margin-bottom:1rem">🌱</div><strong style="color:var(--text)">No contributions yet.</strong><br>Be the first to submit!<br><br><button class="btn btn-pink btn-sm" onclick="showPage('submit')">+ Submit First Contribution</button></div>`;
+      return;
+    }
+    el.innerHTML=items.map(item=>renderPost(item)).join('');
+  }catch(e){
+    el.innerHTML='<div style="text-align:center;padding:2rem;color:var(--muted)">Could not load feed.</div>';
+  }
+}
+
+async function loadLeaderboard(){
+  const el=document.getElementById('lbContent');
+  const url=S.lbFilter==='all'?API+'/api/leaderboard':API+'/api/leaderboard?category='+S.lbFilter;
+  try{
+    const res=await fetch(url);
+    const j=await res.json();
+    if(!j.success||!j.data.length){el.innerHTML='<div class="lb-empty">No contributors yet. Be the first!</div>';return;}
+    el.innerHTML=j.data.map((u,i)=>{
+      const rc=i===0?'g':i===1?'s':i===2?'b':'';
+      const col=wColor(u.walletAddress);
+      return`<div class="lb-row" onclick="viewProfile('${u.walletAddress}')">
+        <div class="lb-rn ${rc}">${String(u.rank||i+1).padStart(2,'0')}</div>
+        <div class="lb-ui"><div class="lb-av" style="background:${col}">${ini(u.username)}</div>
+        <div><div class="lb-nm">${u.username}</div><div class="lb-wl">${shortW(u.walletAddress)}</div></div></div>
+        <div class="lb-sc">${u.reputationScore}</div>
+        <div class="lb-bd">${(u.badges||[]).slice(0,2).map(b=>`<span class="chip">${b.name||''}</span>`).join('')}</div>
+      </div>`;
+    }).join('');
+    // Update landing leaderboard
+    document.getElementById('landingLb').innerHTML=j.data.slice(0,5).map((u,i)=>{
+      const rc=i===0?'g':i===1?'s':i===2?'b':'';
+      const col=wColor(u.walletAddress);
+      return`<div class="lb-row">
+        <div class="lb-rn ${rc}">${String(u.rank||i+1).padStart(2,'0')}</div>
+        <div class="lb-ui"><div class="lb-av" style="background:${col}">${ini(u.username)}</div>
+        <div><div class="lb-nm">${u.username}</div><div class="lb-wl">${shortW(u.walletAddress)}</div></div></div>
+        <div class="lb-sc">${u.reputationScore}</div>
+        <div class="lb-bd">${(u.badges||[]).slice(0,1).map(b=>`<span class="chip">${b.name||''}</span>`).join('')}</div>
+      </div>`;
+    }).join('');
+  }catch(e){el.innerHTML='<div class="lb-empty">Could not load leaderboard.</div>';}
+}
+
+function setLbFilter(f,btn){S.lbFilter=f;document.querySelectorAll('.lf').forEach(b=>b.classList.remove('on'));btn.classList.add('on');loadLeaderboard();}
+
+// ════════════ POST CARD ════════════
+function renderPost(c){
+  const t=TM[c.type]||{emoji:'📝',label:c.type,color:'#fff'};
+  const col=wColor(c.walletAddress);
+  const id='p'+c._id;
+  return`<div class="post-card" id="${id}">
+    <div class="post-top">
+      <div class="post-av" style="background:${col}">${ini(c.username)}</div>
+      <div style="flex:1">
+        <div class="post-uname" onclick="viewProfile('${c.walletAddress}')">${c.username}</div>
+        <div class="post-time">${timeAgo(c.createdAt)}</div>
+      </div>
+      <span class="post-type-tag" style="color:${t.color};border-color:${t.color}30;background:${t.color}10">${t.emoji} ${t.label}</span>
+    </div>
+    <div class="post-body">
+      <div class="post-title">${c.title}</div>
+      ${c.description?`<div class="post-desc">${c.description}</div>`:''}
+      <a class="post-link" href="${c.proofLink}" target="_blank">🔗 View Proof ↗</a>
+      ${c.verified?'<span class="verified-tag" style="margin-left:.75rem">✅ Verified</span>':''}
+    </div>
+    <div class="post-pts">+${c.points} pts</div>
+    <div class="post-acts">
+      <button class="post-act" onclick="toggleLike('${id}',this)"><span>🤍</span> <span class="lc">0</span></button>
+      <button class="post-act" onclick="toggleComments('${id}')"><span>💬</span> Comment</button>
+      <button class="post-act" onclick="shareProfile('${c.walletAddress}')"><span>🔗</span> Share</button>
+    </div>
+    <div class="comments-wrap" id="cw-${id}">
+      <div class="c-input"><input type="text" placeholder="Write a comment..." id="ci-${id}" onkeydown="if(event.key==='Enter')addComment('${id}')"/><button class="btn btn-pink btn-xs" onclick="addComment('${id}')">Post</button></div>
+      <div id="cl-${id}" style="margin-top:.5rem"></div>
+    </div>
+  </div>`;
+}
+
+function toggleLike(id,btn){
+  const liked=btn.classList.toggle('liked');
+  const lc=btn.querySelector('.lc');
+  btn.querySelector('span').textContent=liked?'🩷':'🤍';
+  lc.textContent=liked?+lc.textContent+1:Math.max(0,+lc.textContent-1);
+}
+function toggleComments(id){document.getElementById('cw-'+id).classList.toggle('on');}
+function addComment(id){
+  const inp=document.getElementById('ci-'+id);
+  const txt=inp?.value?.trim();if(!txt)return;
+  const cl=document.getElementById('cl-'+id);
+  const col=wColor(S.wallet);
+  cl.innerHTML+=`<div class="comment"><div class="c-av" style="background:${col}">${ini(S.username)}</div><div class="c-body"><div class="c-name">${S.username}</div><div class="c-text">${txt}</div></div></div>`;
+  inp.value='';
+}
+function shareProfile(wallet){
+  const url=window.location.origin+window.location.pathname+'#profile/'+wallet;
+  navigator.clipboard?.writeText(url).then(()=>toast('Profile link copied!')).catch(()=>prompt('Copy your profile link:',url));
+}
+
+// ════════════ SUBMIT ════════════
+async function submitContrib(){
+  const title=document.getElementById('fTitle').value.trim();
+  const type=document.getElementById('fType').value;
+  const link=document.getElementById('fLink').value.trim();
+  const desc=document.getElementById('fDesc').value.trim();
+  if(!title||!link){toast('Please fill in the title and proof link');return;}
+  if(!link.startsWith('http')){toast('Proof link must start with https://');return;}
+  showConn(true);
+  try{
+    const res=await fetch(API+'/api/contributions',{
+      method:'POST',
+      headers:{'Content-Type':'application/json','Authorization':'Bearer '+S.token},
+      body:JSON.stringify({title,type,proofLink:link,description:desc}),
+    });
+    const data=await res.json();
+    if(!data.success)throw new Error(data.message);
+    const d=data.data;
+    S.score=d.newReputationScore;S.scoreBreakdown=d.scoreBreakdown;
+    if(d.newBadges?.length){S.badges.push(...d.newBadges);toast('🏅 New badge: '+d.newBadges.map(b=>b.name).join(', '));}
+    S.contributions.unshift(d.contribution);
+    document.getElementById('fTitle').value='';
+    document.getElementById('fLink').value='';
+    document.getElementById('fDesc').value='';
+    showConn(false);
+    toast('✅ +'+d.pointsAwarded+' pts! Your contribution is now live on the feed.');
+    updateMyProfile();loadFeed();loadLeaderboard();
+    showPage('feed');
+  }catch(e){
+    showConn(false);
+    toast(e.message||'Could not submit — please try again');
+  }
+}
+
+// ════════════ MY PROFILE ════════════
+function updateMyProfile(){
+  const col=wColor(S.wallet);
+  document.getElementById('myAva').style.background=col;
+  document.getElementById('myAva').textContent=ini(S.username);
+  document.getElementById('myName').textContent=S.username||shortW(S.wallet);
+  document.getElementById('myWlt').textContent=shortW(S.wallet);
+  document.getElementById('myBio').textContent=S.bio||'Building reputation on Solana.';
+  document.getElementById('myScore').textContent=S.score;
+  document.getElementById('myContribs').textContent=S.contributions.length;
+  document.getElementById('myBadgeCount').textContent=S.badges.length;
+  const handles=[];
+  if(S.xHandle)handles.push(`<span class="handle">𝕏 ${S.xHandle}</span>`);
+  if(S.tgHandle)handles.push(`<span class="handle">✈️ ${S.tgHandle}</span>`);
+  if(S.ghHandle)handles.push(`<span class="handle">🐙 ${S.ghHandle}</span>`);
+  document.getElementById('myHandles').innerHTML=handles.join('');
+  document.getElementById('shareUrl').textContent=window.location.origin+window.location.pathname+'#profile/'+S.wallet;
+  // Contributions tab
+  const ct=document.getElementById('myContribTab');
+  ct.innerHTML=S.contributions.length?S.contributions.map(c=>{
+    const t=TM[c.type]||{emoji:'📝',label:c.type,color:'#fff'};
+    return`<div class="post-card" style="margin-bottom:.75rem">
+      <div class="post-top">
+        <div class="post-av" style="background:${wColor(S.wallet)}">${ini(S.username)}</div>
+        <div style="flex:1"><div style="font-weight:700;font-size:.85rem;color:#fff">${S.username}</div><div style="font-size:.67rem;color:var(--muted)">${timeAgo(c.createdAt)}</div></div>
+        <span class="post-type-tag" style="color:${t.color};border-color:${t.color}30;background:${t.color}10">${t.emoji} ${t.label}</span>
+      </div>
+      <div class="post-body"><div class="post-title">${c.title}</div><a class="post-link" href="${c.proofLink}" target="_blank">🔗 View Proof ↗</a></div>
+      <div class="post-pts">+${c.points} pts</div>
+    </div>`;
+  }).join(''):'<div style="text-align:center;padding:2rem;color:var(--muted)">No contributions yet. Go submit!</div>';
+  // Badges
+  const bg=document.getElementById('myBadgesGrid');
+  bg.innerHTML=S.badges.length?S.badges.map(b=>`<div class="b-card"><span class="b-em">${b.emoji||'🏅'}</span><div class="b-nm">${b.name||b.id||'Badge'}</div><div class="b-desc">${b.description||''}</div></div>`).join(''):'<div style="color:var(--muted);font-size:.85rem;grid-column:1/-1;text-align:center;padding:2rem">No badges yet. Start contributing!</div>';
+}
+
+function showPTab(tab,el){
+  document.querySelectorAll('.ptab').forEach(t=>t.classList.remove('on'));el.classList.add('on');
+  document.getElementById('myContribTab').style.display=tab==='contributions'?'block':'none';
+  document.getElementById('myBadgeTab').style.display=tab==='badges'?'block':'none';
+}
+function copyShareLink(){
+  const url=window.location.origin+window.location.pathname+'#profile/'+S.wallet;
+  navigator.clipboard?.writeText(url).then(()=>toast('Profile link copied!')).catch(()=>prompt('Copy link:',url));
+}
+
+// ════════════ VIEW PROFILE MODAL ════════════
+async function viewProfile(walletAddr){
+  if(!walletAddr)return;
+  document.getElementById('vmTitle').textContent='Loading...';
+  document.getElementById('vmBody').innerHTML='<div style="text-align:center;padding:2rem;color:var(--muted)">Loading...</div>';
+  document.getElementById('viewModal').classList.add('on');
+  try{
+    const res=await fetch(API+'/api/users/'+walletAddr);
+    const j=await res.json();
+    if(!j.success)throw new Error(j.message);
+    const u=j.data;const col=wColor(walletAddr);
+    document.getElementById('vmTitle').textContent=u.username||shortW(walletAddr);
+    let handles='';
+    try{const x=JSON.parse(u.avatar||'{}');
+      if(x.x)handles+=`<span class="handle">𝕏 ${x.x}</span>`;
+      if(x.tg)handles+=`<span class="handle">✈️ ${x.tg}</span>`;
+      if(x.gh)handles+=`<span class="handle">🐙 ${x.gh}</span>`;
+    }catch(e){}
+    const contribs=(u.recentContributions||[]).map(c=>{
+      const t=TM[c.type]||{emoji:'📝',label:c.type,color:'#fff'};
+      return`<div style="display:flex;gap:.75rem;padding:.7rem 0;border-bottom:1px solid var(--border);align-items:center">
+        <div>${t.emoji}</div>
+        <div style="flex:1"><div style="font-weight:700;font-size:.83rem;color:#fff">${c.title}</div><div style="font-size:.68rem;color:var(--muted)">${t.label} · ${timeAgo(c.createdAt)}</div></div>
+        <div style="font-family:'Bebas Neue',sans-serif;font-size:1.1rem;color:var(--pink)">+${c.points}</div>
+      </div>`;
+    }).join('');
+    document.getElementById('vmBody').innerHTML=`
+      <div style="background:linear-gradient(135deg,var(--bg3),var(--bg2));padding:1.5rem;margin:-1.5rem -1.5rem 1.5rem;position:relative;overflow:hidden;border-radius:8px 8px 0 0">
+        <div style="position:absolute;top:-40px;right:-40px;width:180px;height:180px;background:radial-gradient(circle,rgba(224,64,251,0.2),transparent 70%);pointer-events:none"></div>
+        <div style="width:58px;height:58px;border-radius:6px;background:${col};display:flex;align-items:center;justify-content:center;font-weight:800;font-size:1.3rem;color:#fff;margin-bottom:.75rem;position:relative">${ini(u.username)}</div>
+        <div style="font-family:'Bebas Neue',sans-serif;font-size:1.6rem;color:#fff;position:relative">${u.username||shortW(walletAddr)}</div>
+        <div style="font-family:'JetBrains Mono',monospace;font-size:.67rem;color:var(--muted);position:relative">${shortW(walletAddr)}</div>
+        ${u.bio?`<div style="font-size:.82rem;color:var(--muted);margin-top:.4rem;position:relative">${u.bio}</div>`:''}
+        <div style="display:flex;gap:.4rem;flex-wrap:wrap;margin-top:.5rem;position:relative">${handles}</div>
+        <div style="display:flex;gap:2rem;margin-top:1rem;position:relative">
+          <div><div style="font-family:'Bebas Neue',sans-serif;font-size:1.8rem;background:linear-gradient(135deg,var(--pink),var(--pink3));-webkit-background-clip:text;-webkit-text-fill-color:transparent">${u.reputationScore||0}</div><div style="font-size:.62rem;color:var(--muted);text-transform:uppercase">Score</div></div>
+          <div><div style="font-family:'Bebas Neue',sans-serif;font-size:1.8rem;background:linear-gradient(135deg,var(--pink),var(--pink3));-webkit-background-clip:text;-webkit-text-fill-color:transparent">${u.contributionCount||0}</div><div style="font-size:.62rem;color:var(--muted);text-transform:uppercase">Contributions</div></div>
+          <div><div style="font-family:'Bebas Neue',sans-serif;font-size:1.8rem;background:linear-gradient(135deg,var(--pink),var(--pink3));-webkit-background-clip:text;-webkit-text-fill-color:transparent">#${u.rank||'—'}</div><div style="font-size:.62rem;color:var(--muted);text-transform:uppercase">Rank</div></div>
+        </div>
+      </div>
+      ${(u.badges||[]).length?`<div style="display:flex;gap:.3rem;flex-wrap:wrap;margin-bottom:1rem">${u.badges.map(b=>`<span class="chip">${b.name||''}</span>`).join('')}</div>`:''}
+      <div style="display:flex;gap:.5rem;margin-bottom:1rem">
+        ${S.token?`<button class="btn btn-pink btn-sm" onclick="openChat('${walletAddr}','${u.username||shortW(walletAddr)}');closeViewModal()">💬 Message</button>`:''}
+        <button class="btn btn-ghost btn-sm" onclick="shareProfile('${walletAddr}')">🔗 Share Profile</button>
+      </div>
+      <div style="font-family:'Bebas Neue',sans-serif;font-size:.95rem;color:#fff;letter-spacing:.05em;margin-bottom:.75rem">Recent Contributions</div>
+      ${contribs||'<div style="color:var(--muted);font-size:.83rem">No contributions yet.</div>'}`;
+  }catch(e){document.getElementById('vmBody').innerHTML='<div style="color:var(--pink);padding:1rem">'+e.message+'</div>';}
+}
+function closeViewModal(){document.getElementById('viewModal').classList.remove('on');}
+
+// ════════════ PUBLIC PROFILE (shareable) ════════════
+async function loadPublicProfile(walletAddr){
+  document.getElementById('landing').style.display='none';
+  document.getElementById('dashboard').classList.remove('on');
+  document.getElementById('pubProf').style.display='block';
+  try{
+    const res=await fetch(API+'/api/users/'+walletAddr);
+    const j=await res.json();
+    if(!j.success)throw new Error(j.message);
+    const u=j.data;const col=wColor(walletAddr);
+    document.getElementById('pubAva').style.background=col;
+    document.getElementById('pubAva').textContent=ini(u.username);
+    document.getElementById('pubName').textContent=u.username||shortW(walletAddr);
+    document.getElementById('pubWlt').textContent=shortW(walletAddr);
+    document.getElementById('pubBio').textContent=u.bio||'ProofLayer contributor';
+    document.getElementById('pubScore').textContent=u.reputationScore||0;
+    document.getElementById('pubC').textContent=u.contributionCount||0;
+    document.getElementById('pubB').textContent=(u.badges||[]).length;
+    let handles='';
+    try{const x=JSON.parse(u.avatar||'{}');
+      if(x.x)handles+=`<span class="handle">𝕏 ${x.x}</span>`;
+      if(x.tg)handles+=`<span class="handle">✈️ ${x.tg}</span>`;
+      if(x.gh)handles+=`<span class="handle">🐙 ${x.gh}</span>`;
+    }catch(e){}
+    document.getElementById('pubHandles').innerHTML=handles;
+    const cl=document.getElementById('pubContribList');
+    const contribs=u.recentContributions||[];
+    cl.innerHTML=contribs.length?contribs.map(c=>{
+      const t=TM[c.type]||{emoji:'📝',label:c.type,color:'#fff'};
+      return`<div class="post-card" style="margin-bottom:.75rem">
+        <div class="post-top">
+          <div class="post-av" style="background:${col}">${ini(u.username)}</div>
+          <div style="flex:1"><div style="font-weight:700;font-size:.85rem;color:#fff">${u.username}</div><div style="font-size:.67rem;color:var(--muted)">${timeAgo(c.createdAt)}</div></div>
+          <span class="post-type-tag" style="color:${t.color};border-color:${t.color}30;background:${t.color}10">${t.emoji} ${t.label}</span>
+        </div>
+        <div class="post-body"><div class="post-title">${c.title}</div><a class="post-link" href="${c.proofLink}" target="_blank">🔗 View Proof ↗</a></div>
+        <div class="post-pts">+${c.points} pts</div>
+      </div>`;
+    }).join(''):'<div style="text-align:center;padding:2rem;color:var(--muted)">No contributions yet.</div>';
+  }catch(e){document.getElementById('pubBio').textContent='Profile could not be loaded.';}
+}
+
+// ════════════ MESSAGES ════════════
+function openChat(walletAddr,username){
+  if(!S.token){connectWallet();return;}
+  S.chatWith={wallet:walletAddr,username,color:wColor(walletAddr)};
+  document.getElementById('chatAv').style.background=S.chatWith.color;
+  document.getElementById('chatAv').textContent=ini(username);
+  document.getElementById('chatName').textContent=username;
+  document.getElementById('chatWlt').textContent=shortW(walletAddr);
+  renderChatMsgs(S.messages[walletAddr]||[]);
+  document.getElementById('chatWin').classList.add('on');
+  document.getElementById('chatInput').focus();
+  updateMsgList();
+}
+function closeChat(){document.getElementById('chatWin').classList.remove('on');}
+function renderChatMsgs(msgs){
+  const el=document.getElementById('chatMsgs');
+  el.innerHTML=msgs.length?msgs.map(m=>`<div class="bubble ${m.from===S.wallet?'b-out':'b-in'}">${m.text}<div class="b-time">${timeAgo(m.time)}</div></div>`).join(''):'<div style="text-align:center;color:var(--muted);font-size:.82rem;padding:2rem">Say hello! 👋</div>';
+  el.scrollTop=el.scrollHeight;
+}
+function sendMsg(){
+  const inp=document.getElementById('chatInput');
+  const txt=inp.value.trim();if(!txt||!S.chatWith)return;
+  const msg={from:S.wallet,to:S.chatWith.wallet,text:txt,time:new Date().toISOString()};
+  if(!S.messages[S.chatWith.wallet])S.messages[S.chatWith.wallet]=[];
+  S.messages[S.chatWith.wallet].push(msg);
+  inp.value='';renderChatMsgs(S.messages[S.chatWith.wallet]);updateMsgList();
+}
+function updateMsgList(){
+  const el=document.getElementById('msgList');
+  const convos=Object.entries(S.messages);
+  el.innerHTML=convos.length?convos.map(([w,msgs])=>{
+    const last=msgs[msgs.length-1];const col=wColor(w);
+    const name=w===S.chatWith?.wallet?S.chatWith.username:shortW(w);
+    return`<div class="msg-item" onclick="openChat('${w}','${name}')">
+      <div class="msg-av" style="background:${col}">${ini(name)}</div>
+      <div style="flex:1;min-width:0"><div class="msg-nm">${name}</div><div class="msg-prev">${last?.text||''}</div></div>
+      <div class="msg-time">${timeAgo(last?.time)}</div>
+    </div>`;
+  }).join(''):'<div style="text-align:center;padding:3rem;color:var(--muted)"><div style="font-size:2rem;margin-bottom:.75rem">💬</div>No messages yet.<br><span style="font-size:.83rem">Tap a user to message them.</span></div>';
+}
+
+// ════════════ EDIT PROFILE ════════════
+function openEditModal(){
+  document.getElementById('eUser').value=S.username||'';
+  document.getElementById('eBio').value=S.bio||'';
+  document.getElementById('eX').value=S.xHandle||'';
+  document.getElementById('eTg').value=S.tgHandle||'';
+  document.getElementById('eGh').value=S.ghHandle||'';
+  document.getElementById('editModal').classList.add('on');
+}
+function closeEditModal(){document.getElementById('editModal').classList.remove('on');}
+async function saveProfile(){
+  const username=document.getElementById('eUser').value.trim();
+  const bio=document.getElementById('eBio').value.trim();
+  const x=document.getElementById('eX').value.trim();
+  const tg=document.getElementById('eTg').value.trim();
+  const gh=document.getElementById('eGh').value.trim();
+  showConn(true);
+  try{
+    const res=await fetch(API+'/api/users/profile',{method:'PATCH',headers:{'Content-Type':'application/json','Authorization':'Bearer '+S.token},body:JSON.stringify({username,bio,avatar:JSON.stringify({x,tg,gh})})});
+    const j=await res.json();
+    if(!j.success)throw new Error(j.message);
+    S.username=username||S.username;S.bio=bio;S.xHandle=x;S.tgHandle=tg;S.ghHandle=gh;
+    showConn(false);closeEditModal();updateMyProfile();toast('Profile updated!');
+  }catch(e){showConn(false);toast(e.message||'Could not save — please try again');}
+}
+
+// ════════════ PAGE NAV ════════════
+function showPage(p){
+  document.querySelectorAll('.page').forEach(el=>el.classList.remove('on'));
+  document.querySelectorAll('.bni').forEach(el=>el.classList.remove('on'));
+  document.getElementById('page-'+p)?.classList.add('on');
+  document.getElementById('bn-'+p)?.classList.add('on');
+  if(p==='me')updateMyProfile();
+  if(p==='lb')loadLeaderboard();
+  if(p==='messages')updateMsgList();
+  if(p==='feed')loadFeed();
+}
+
+// ════════════ ROUTING ════════════
+function checkRoute(){
+  const hash=window.location.hash;
+  if(hash.startsWith('#profile/')){
+    const w=hash.replace('#profile/','');
+    if(w)loadPublicProfile(w);
+  }
+}
+window.addEventListener('hashchange',checkRoute);
+</script>
+</body>
+</html>
