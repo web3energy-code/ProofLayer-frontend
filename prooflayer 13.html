@@ -1,0 +1,969 @@
+<!DOCTYPE html>
+<html lang="en">
+<head>
+<meta charset="UTF-8"/>
+<meta name="viewport" content="width=device-width, initial-scale=1.0"/>
+<title>ProofLayer — Decentralized Reputation on Solana</title>
+<meta name="description" content="ProofLayer — Build verifiable on-chain reputation. The home of Web3 contributions on Solana."/>
+<link href="https://fonts.googleapis.com/css2?family=Bebas+Neue&family=DM+Sans:wght@300;400;500;600;700&family=JetBrains+Mono:wght@400;700&display=swap" rel="stylesheet"/>
+<script src="https://cdn.socket.io/4.7.2/socket.io.min.js"></script>
+<style>
+*{margin:0;padding:0;box-sizing:border-box}
+:root{
+  --bg:#0a0010;--bg2:#110018;--bg3:#1a0025;
+  --pk:#e040fb;--pk2:#ce36e8;--pk3:#f06fff;
+  --pkp:rgba(224,64,251,0.08);--pkb:rgba(224,64,251,0.2);
+  --w:#ffffff;--off:#f8f0ff;--text:#e8dff0;--muted:#9580a8;
+  --border:rgba(255,255,255,0.07);--card:rgba(17,0,24,0.8);
+}
+html{scroll-behavior:smooth}
+body{background:var(--bg);color:var(--text);font-family:'DM Sans',sans-serif;overflow-x:hidden}
+.btn{display:inline-flex;align-items:center;gap:.5rem;padding:.7rem 1.6rem;border-radius:4px;font-family:'DM Sans',sans-serif;font-weight:700;font-size:.82rem;cursor:pointer;border:none;transition:all .22s;letter-spacing:.04em;text-transform:uppercase}
+.btn-pk{background:linear-gradient(135deg,var(--pk),var(--pk2));color:#fff;box-shadow:0 4px 20px rgba(224,64,251,0.3)}
+.btn-pk:hover{transform:translateY(-2px);box-shadow:0 8px 28px rgba(224,64,251,0.45)}
+.btn-out{background:transparent;border:1.5px solid var(--pkb);color:var(--pk3)}.btn-out:hover{background:var(--pkp);border-color:var(--pk)}
+.btn-gh{background:var(--card);border:1px solid var(--border);color:var(--text)}.btn-gh:hover{border-color:var(--pkb);color:var(--pk3)}
+.btn-sm{padding:.42rem 1rem;font-size:.75rem}
+.btn-xs{padding:.28rem .7rem;font-size:.68rem}
+.btn-red{background:rgba(239,68,68,0.12);border:1px solid rgba(239,68,68,0.3);color:#f87171}.btn-red:hover{background:rgba(239,68,68,0.2)}
+nav{position:fixed;top:0;left:0;right:0;z-index:100;display:flex;align-items:center;justify-content:space-between;padding:.9rem 2rem;background:rgba(10,0,16,0.95);backdrop-filter:blur(24px);border-bottom:1px solid var(--border)}
+.logo{display:flex;align-items:center;gap:.6rem;font-family:'Bebas Neue',sans-serif;font-size:1.6rem;letter-spacing:.06em;background:linear-gradient(135deg,var(--pk),var(--pk3));-webkit-background-clip:text;-webkit-text-fill-color:transparent}
+.logo-icon{width:32px;height:32px;flex-shrink:0}
+.nav-mid{display:flex;gap:1.75rem}
+.nl{font-size:.82rem;font-weight:500;color:var(--muted);cursor:pointer;transition:color .2s}.nl:hover{color:var(--pk3)}
+.nav-r{display:flex;align-items:center;gap:.75rem}
+/* HERO */
+.hero{min-height:100vh;display:flex;flex-direction:column;align-items:center;justify-content:center;padding:8rem 2rem 5rem;position:relative;overflow:hidden;text-align:center}
+.h-bg{position:absolute;inset:0;z-index:0}
+.hg1{position:absolute;width:700px;height:700px;background:radial-gradient(circle,rgba(224,64,251,0.18),transparent 65%);top:-200px;right:-100px;pointer-events:none;animation:hgf 8s ease-in-out infinite}
+.hg2{position:absolute;width:500px;height:500px;background:radial-gradient(circle,rgba(160,32,196,0.12),transparent 65%);bottom:-100px;left:-100px;pointer-events:none;animation:hgf 10s ease-in-out infinite reverse}
+@keyframes hgf{0%,100%{transform:translate(0,0)}50%{transform:translate(20px,-20px)}}
+.hgrid{position:absolute;inset:0;background-image:linear-gradient(rgba(224,64,251,0.06) 1px,transparent 1px),linear-gradient(90deg,rgba(224,64,251,0.06) 1px,transparent 1px);background-size:55px 55px}
+.h-in{position:relative;z-index:1;max-width:880px}
+.h-pill{display:inline-flex;align-items:center;gap:.5rem;background:rgba(224,64,251,0.12);border:1px solid var(--pkb);color:var(--pk3);padding:.35rem 1rem;font-size:.68rem;font-weight:700;letter-spacing:.15em;text-transform:uppercase;margin-bottom:2rem;border-radius:20px}
+.pdot{width:6px;height:6px;background:var(--pk);border-radius:50%;animation:blink 1.6s infinite}
+@keyframes blink{0%,100%{opacity:1}50%{opacity:.2}}
+.h-h1{font-family:'Bebas Neue',sans-serif;font-size:clamp(3.5rem,11vw,8rem);line-height:.88;color:#fff}
+.h-h1 em{display:block;font-style:normal;background:linear-gradient(135deg,var(--pk),var(--pk3));-webkit-background-clip:text;-webkit-text-fill-color:transparent}
+.h-p{font-size:clamp(.92rem,2vw,1.08rem);color:var(--muted);max-width:560px;margin:2rem auto;line-height:1.82;font-weight:300}
+.h-p strong{color:var(--text);font-weight:600}
+.h-acts{display:flex;gap:1rem;justify-content:center;flex-wrap:wrap;margin-top:2.5rem}
+.h-stats{display:flex;gap:3rem;justify-content:center;margin-top:3.5rem;flex-wrap:wrap}
+.hstat-n{font-family:'Bebas Neue',sans-serif;font-size:2.8rem;background:linear-gradient(135deg,var(--pk),var(--pk3));-webkit-background-clip:text;-webkit-text-fill-color:transparent;display:block;line-height:1}
+.hstat-l{font-size:.68rem;color:var(--muted);text-transform:uppercase;letter-spacing:.14em}
+/* TICKER */
+.ticker-wrap{background:linear-gradient(135deg,#1a002a,#0d0018);padding:.65rem 0;overflow:hidden;white-space:nowrap;border-top:1px solid var(--pkb);border-bottom:1px solid var(--pkb)}
+.ticker-in{display:inline-flex;animation:tick 32s linear infinite}
+.ti{display:inline-flex;align-items:center;gap:1rem;padding:0 2rem;font-family:'Bebas Neue',sans-serif;font-size:1rem;letter-spacing:.08em;color:var(--pk3)}
+.ts{color:var(--pkb)}
+@keyframes tick{to{transform:translateX(-50%)}}
+/* SECTIONS */
+.section{padding:6rem 2rem}
+.s-in{max-width:1100px;margin:0 auto}
+.sec-k{font-size:.68rem;letter-spacing:.2em;text-transform:uppercase;color:var(--pk);font-weight:700;margin-bottom:.75rem;display:flex;align-items:center;gap:.5rem}
+.sec-k::before{content:'';width:20px;height:1.5px;background:var(--pk)}
+.sec-h{font-family:'Bebas Neue',sans-serif;font-size:clamp(2rem,5vw,3.5rem);line-height:.95;color:#fff}
+.sec-p{color:var(--muted);font-size:.9rem;line-height:1.8;margin-top:.75rem;font-weight:300}
+/* FEAT CARDS */
+.fg{display:grid;grid-template-columns:repeat(auto-fit,minmax(220px,1fr));gap:1px;background:var(--border);margin-top:3rem}
+.fc{background:var(--bg2);padding:2.5rem 2rem;position:relative;overflow:hidden;transition:background .3s}
+.fc::after{content:'';position:absolute;bottom:0;left:0;right:0;height:2px;background:linear-gradient(90deg,var(--pk),var(--pk3));transform:scaleX(0);transform-origin:left;transition:transform .4s}
+.fc:hover{background:rgba(224,64,251,0.05)}.fc:hover::after{transform:scaleX(1)}
+.fc-n{font-family:'Bebas Neue',sans-serif;font-size:2.5rem;color:rgba(224,64,251,0.12);line-height:1;margin-bottom:.4rem}
+.fc-i{font-size:1.8rem;margin-bottom:1rem;display:block}
+.fc-h{font-family:'Bebas Neue',sans-serif;font-size:1.25rem;color:#fff;margin-bottom:.6rem;letter-spacing:.04em}
+.fc-p{font-size:.8rem;color:var(--muted);line-height:1.75}
+.fc-pts{display:inline-block;margin-top:1rem;font-family:'JetBrains Mono',monospace;font-size:.68rem;color:var(--pk);border:1px solid var(--pkb);padding:.22rem .6rem;background:var(--pkp);border-radius:3px}
+/* LB */
+.lb-wrap{border:1px solid var(--border);border-radius:8px;overflow:hidden;margin-top:2rem}
+.lb-hd{display:grid;grid-template-columns:60px 1fr 100px 160px;gap:1rem;padding:.8rem 1.5rem;background:rgba(224,64,251,0.06);border-bottom:1px solid var(--border);font-size:.67rem;font-weight:700;letter-spacing:.12em;text-transform:uppercase;color:var(--muted)}
+.lb-r{display:grid;grid-template-columns:60px 1fr 100px 160px;gap:1rem;padding:1rem 1.5rem;border-bottom:1px solid var(--border);align-items:center;background:var(--bg2);transition:background .2s;cursor:pointer}
+.lb-r:hover{background:rgba(224,64,251,0.06)}.lb-r:last-child{border-bottom:none}
+.lb-rn{font-family:'Bebas Neue',sans-serif;font-size:1.5rem;color:rgba(255,255,255,.15)}
+.lb-rn.g{background:linear-gradient(135deg,var(--pk),var(--pk3));-webkit-background-clip:text;-webkit-text-fill-color:transparent}
+.lb-rn.s{color:#94a3b8}.lb-rn.b{color:#cd7f32}
+.lb-ui{display:flex;align-items:center;gap:.75rem}
+.av{width:38px;height:38px;border-radius:6px;display:flex;align-items:center;justify-content:center;font-weight:800;font-size:.8rem;color:#fff;flex-shrink:0;font-family:'JetBrains Mono',monospace}
+.lb-nm{font-weight:700;font-size:.875rem;color:#fff}
+.lb-wl{font-size:.67rem;color:var(--muted);font-family:'JetBrains Mono',monospace}
+.lb-sc{font-family:'Bebas Neue',sans-serif;font-size:1.5rem;background:linear-gradient(135deg,var(--pk),var(--pk3));-webkit-background-clip:text;-webkit-text-fill-color:transparent}
+.lb-bd{display:flex;gap:3px;flex-wrap:wrap}
+.chip{display:inline-block;padding:2px 7px;background:var(--pkp);border:1px solid var(--pkb);font-size:.6rem;font-weight:700;color:var(--pk3);letter-spacing:.05em;text-transform:uppercase;border-radius:3px}
+.lb-empty{text-align:center;padding:3rem;color:var(--muted);font-size:.88rem}
+/* TOAST */
+.toast{position:fixed;bottom:2rem;right:2rem;background:var(--bg3);color:var(--text);padding:.9rem 1.4rem;font-size:.84rem;font-weight:500;z-index:9999;transform:translateY(130%);transition:transform .4s cubic-bezier(.34,1.56,.64,1);max-width:310px;border-left:3px solid var(--pk);border-radius:6px;border:1px solid var(--pkb)}
+.toast.on{transform:translateY(0)}
+/* CONNECTING */
+.conn{position:fixed;inset:0;background:rgba(10,0,16,.95);backdrop-filter:blur(16px);z-index:200;display:none;flex-direction:column;align-items:center;justify-content:center;gap:1.5rem}
+.conn.on{display:flex}
+.conn-ring{width:56px;height:56px;border:3px solid var(--pkb);border-top-color:var(--pk);border-radius:50%;animation:spin .8s linear infinite}
+@keyframes spin{to{transform:rotate(360deg)}}
+.conn-logo{font-family:'Bebas Neue',sans-serif;font-size:2rem;letter-spacing:.08em;background:linear-gradient(135deg,var(--pk),var(--pk3));-webkit-background-clip:text;-webkit-text-fill-color:transparent}
+/* MODALS */
+.mb{position:fixed;inset:0;background:rgba(0,0,0,.75);z-index:300;display:none;align-items:center;justify-content:center;padding:1rem}
+.mb.on{display:flex}
+.modal{background:var(--bg2);border:1px solid var(--border);border-radius:10px;width:100%;max-width:500px;max-height:90vh;overflow-y:auto}
+.mh{padding:1.2rem 1.5rem;border-bottom:1px solid var(--border);display:flex;align-items:center;justify-content:space-between}
+.mt{font-family:'Bebas Neue',sans-serif;font-size:1.35rem;color:#fff;letter-spacing:.05em}
+.mc{font-size:1.4rem;cursor:pointer;color:var(--muted);background:none;border:none;line-height:1;transition:color .2s}.mc:hover{color:var(--pk3)}
+.mbody{padding:1.5rem}
+/* INPUTS */
+.fg2{display:flex;flex-direction:column;gap:5px;margin-bottom:1rem}
+label{font-size:.67rem;font-weight:700;color:var(--muted);text-transform:uppercase;letter-spacing:.1em}
+input,select,textarea{background:rgba(255,255,255,.05);border:1px solid var(--border);border-radius:5px;padding:.65rem 1rem;color:var(--text);font-family:'DM Sans',sans-serif;font-size:.875rem;width:100%;transition:border-color .2s}
+input:focus,select:focus,textarea:focus{outline:none;border-color:var(--pk);background:rgba(224,64,251,0.06)}
+select option{background:var(--bg2);color:var(--text)}
+textarea{resize:vertical;min-height:80px}
+/* DASHBOARD */
+.dash{display:none;min-height:100vh;background:var(--bg);padding-top:62px}
+.dash.on{display:block}
+.bnav{position:fixed;bottom:0;left:0;right:0;background:rgba(10,0,16,.97);border-top:1px solid var(--border);display:none;z-index:99;backdrop-filter:blur(20px)}
+.bnav.on{display:flex}
+.bni-wrap{display:flex;width:100%}
+.bni{display:flex;flex-direction:column;align-items:center;gap:2px;font-size:.58rem;font-weight:700;color:var(--muted);cursor:pointer;padding:.6rem .75rem;transition:color .2s;text-transform:uppercase;letter-spacing:.07em;flex:1;position:relative}
+.bni.on,.bni:hover{color:var(--pk3)}
+.bni-icon{font-size:1.25rem}
+.badge-dot{position:absolute;top:6px;right:calc(50% - 18px);width:8px;height:8px;background:var(--pk);border-radius:50%;display:none}
+.badge-dot.on{display:block}
+.page{display:none;padding:1.5rem;max-width:680px;margin:0 auto;padding-bottom:90px}
+.page.on{display:block}
+/* FEED */
+.feed-top{display:flex;justify-content:space-between;align-items:center;margin-bottom:1.25rem}
+.feed-title{font-family:'Bebas Neue',sans-serif;font-size:1.7rem;color:#fff;letter-spacing:.05em}
+.post{background:var(--card);border:1px solid var(--border);border-radius:8px;margin-bottom:.9rem;transition:border-color .25s;overflow:hidden}
+.post:hover{border-color:var(--pkb)}
+.post-top{display:flex;align-items:center;gap:.75rem;padding:.9rem 1.1rem .65rem}
+.post-uname{font-weight:700;font-size:.85rem;color:#fff;cursor:pointer;transition:color .2s;flex:1}.post-uname:hover{color:var(--pk3)}
+.post-time{font-size:.67rem;color:var(--muted);margin-top:1px}
+.post-tag{display:inline-flex;align-items:center;gap:3px;padding:2px 9px;background:var(--pkp);border:1px solid var(--pkb);font-size:.6rem;font-weight:700;color:var(--pk3);text-transform:uppercase;border-radius:3px;flex-shrink:0}
+.post-body{padding:.1rem 1.1rem .75rem}
+.post-title{font-weight:700;font-size:.88rem;color:#fff;margin-bottom:.35rem}
+.post-desc{font-size:.8rem;color:var(--muted);line-height:1.65;margin-bottom:.4rem}
+/* EMBEDDED PREVIEW */
+.post-preview{background:rgba(255,255,255,.04);border:1px solid var(--border);border-radius:6px;padding:.75rem 1rem;margin:.5rem 0;display:flex;align-items:center;gap:.75rem;text-decoration:none;transition:background .2s;cursor:pointer}
+.post-preview:hover{background:rgba(224,64,251,0.08);border-color:var(--pkb)}
+.preview-icon{font-size:1.5rem;flex-shrink:0}
+.preview-domain{font-size:.72rem;color:var(--pk3);font-weight:700;font-family:'JetBrains Mono',monospace}
+.preview-label{font-size:.75rem;color:var(--muted);margin-top:1px}
+.preview-arrow{margin-left:auto;color:var(--muted);font-size:.9rem}
+.post-pts{font-family:'Bebas Neue',sans-serif;font-size:.95rem;color:var(--pk);padding:0 1.1rem .5rem;letter-spacing:.05em;display:flex;align-items:center;gap:.5rem}
+.verified-badge{display:inline-flex;align-items:center;gap:2px;font-size:.62rem;color:#4ade80;font-family:'DM Sans',sans-serif;font-weight:600;letter-spacing:0;text-transform:none}
+.post-acts{display:flex;border-top:1px solid var(--border)}
+.pa{flex:1;display:flex;align-items:center;justify-content:center;gap:.35rem;padding:.6rem;font-size:.75rem;font-weight:600;color:var(--muted);cursor:pointer;transition:all .2s;border:none;background:none;font-family:'DM Sans',sans-serif}
+.pa:hover{background:var(--pkp);color:var(--pk3)}.pa.liked{color:var(--pk)}
+.pa-red:hover{background:rgba(239,68,68,0.1);color:#f87171}
+.cw{background:rgba(0,0,0,.25);border-top:1px solid var(--border);padding:.75rem 1.1rem;display:none}
+.cw.on{display:block}
+.cmt{display:flex;gap:.5rem;margin-bottom:.5rem}
+.c-av{width:24px;height:24px;border-radius:4px;display:flex;align-items:center;justify-content:center;font-size:.58rem;font-weight:800;color:#fff;flex-shrink:0}
+.c-body{background:var(--bg3);border:1px solid var(--border);padding:.35rem .65rem;flex:1;border-radius:5px}
+.c-name{font-size:.68rem;font-weight:700;color:var(--pk3)}
+.c-text{font-size:.77rem;color:var(--muted);line-height:1.5}
+.c-inp{display:flex;gap:.5rem;margin-top:.5rem}
+.c-inp input{font-size:.8rem;border-radius:20px;padding:.42rem .85rem}
+/* PROFILE */
+.p-hero{background:linear-gradient(135deg,var(--bg3),var(--bg2));border-bottom:1px solid var(--border);padding:2rem 1.5rem 1.5rem;position:relative;overflow:hidden}
+.p-hero::before{content:'';position:absolute;top:-60px;right:-60px;width:250px;height:250px;background:radial-gradient(circle,rgba(224,64,251,0.2),transparent 70%);pointer-events:none}
+.p-big-av{width:72px;height:72px;border-radius:8px;display:flex;align-items:center;justify-content:center;font-family:'Bebas Neue',sans-serif;font-size:1.8rem;color:#fff;border:2px solid var(--pkb);margin-bottom:1rem;position:relative;z-index:1}
+.p-name{font-family:'Bebas Neue',sans-serif;font-size:1.75rem;color:#fff;letter-spacing:.05em;position:relative;z-index:1}
+.p-wlt{font-family:'JetBrains Mono',monospace;font-size:.68rem;color:var(--muted);position:relative;z-index:1}
+.p-bio{font-size:.83rem;color:var(--muted);margin-top:.5rem;line-height:1.65;position:relative;z-index:1}
+.p-handles{display:flex;gap:.5rem;flex-wrap:wrap;margin-top:.65rem;position:relative;z-index:1}
+.handle{display:inline-flex;align-items:center;gap:.3rem;padding:.28rem .7rem;background:rgba(224,64,251,0.08);border:1px solid var(--pkb);font-size:.73rem;color:var(--pk3);border-radius:4px}
+.p-stats{display:flex;gap:2rem;margin-top:1.1rem;position:relative;z-index:1}
+.p-sv{font-family:'Bebas Neue',sans-serif;font-size:2rem;background:linear-gradient(135deg,var(--pk),var(--pk3));-webkit-background-clip:text;-webkit-text-fill-color:transparent;display:block;line-height:1}
+.p-sl{font-size:.63rem;color:var(--muted);text-transform:uppercase;letter-spacing:.1em}
+.p-acts{display:flex;gap:.5rem;margin-top:1.1rem;position:relative;z-index:1}
+.ptabs{display:flex;border-bottom:1px solid var(--border);margin-bottom:1.25rem}
+.ptab{padding:.55rem 1.1rem;font-size:.78rem;font-weight:700;cursor:pointer;color:var(--muted);border-bottom:2px solid transparent;margin-bottom:-1px;text-transform:uppercase;letter-spacing:.08em;transition:all .2s}
+.ptab.on{color:var(--pk3);border-bottom-color:var(--pk)}
+.share-box{background:var(--pkp);border:1px solid var(--pkb);padding:.9rem 1.1rem;border-radius:6px;display:flex;align-items:center;gap:.75rem;margin-bottom:1rem}
+.share-url{font-family:'JetBrains Mono',monospace;font-size:.68rem;color:var(--text);flex:1;word-break:break-all}
+.sub-card{background:var(--card);border:1px solid var(--border);border-radius:8px;padding:1.5rem;margin-bottom:1rem}
+.mstats{display:grid;grid-template-columns:repeat(2,1fr);gap:1rem;margin-bottom:1.5rem}
+.ms{background:var(--card);border:1px solid var(--border);border-radius:8px;padding:1.1rem;text-align:center;transition:border-color .2s}.ms:hover{border-color:var(--pkb)}
+.ms-v{font-family:'Bebas Neue',sans-serif;font-size:2rem;background:linear-gradient(135deg,var(--pk),var(--pk3));-webkit-background-clip:text;-webkit-text-fill-color:transparent;line-height:1}
+.ms-l{font-size:.67rem;color:var(--muted);text-transform:uppercase;letter-spacing:.1em;margin-top:2px}
+.bg-grid{display:grid;grid-template-columns:repeat(auto-fill,minmax(130px,1fr));gap:.75rem}
+.b-card{background:var(--card);border:1px solid var(--border);border-radius:6px;padding:.9rem;text-align:center;transition:border-color .2s}.b-card:hover{border-color:var(--pkb)}
+.b-em{font-size:1.9rem;display:block;margin-bottom:.35rem}
+.b-nm{font-weight:700;font-size:.78rem;color:#fff}
+.b-desc{font-size:.68rem;color:var(--muted);margin-top:1px;line-height:1.4}
+/* MESSAGES */
+.msg-item{display:flex;align-items:center;gap:.75rem;padding:.85rem 1.1rem;border-bottom:1px solid var(--border);cursor:pointer;transition:background .2s;border-radius:6px}
+.msg-item:hover{background:var(--pkp)}
+.msg-nm{font-weight:700;font-size:.85rem;color:#fff}
+.msg-prev{font-size:.73rem;color:var(--muted);white-space:nowrap;overflow:hidden;text-overflow:ellipsis;max-width:180px}
+.msg-time{font-size:.63rem;color:var(--muted)}
+.chat-win{position:fixed;inset:0;top:62px;bottom:62px;background:var(--bg);z-index:50;display:none;flex-direction:column}
+.chat-win.on{display:flex}
+.chat-head{display:flex;align-items:center;gap:.75rem;padding:.9rem 1.1rem;border-bottom:1px solid var(--border);background:var(--bg2)}
+.chat-back{font-size:1.2rem;cursor:pointer;color:var(--muted);background:none;border:none;padding:.2rem;transition:color .2s}.chat-back:hover{color:var(--pk3)}
+.chat-msgs{flex:1;overflow-y:auto;padding:1rem;display:flex;flex-direction:column;gap:.5rem;background:var(--bg)}
+.bubble{max-width:75%;padding:.55rem .85rem;border-radius:6px;font-size:.84rem;line-height:1.55}
+.b-out{background:linear-gradient(135deg,var(--pk),var(--pk2));color:#fff;align-self:flex-end;border-bottom-right-radius:2px}
+.b-in{background:var(--bg3);color:var(--text);align-self:flex-start;border:1px solid var(--border);border-bottom-left-radius:2px}
+.b-time{font-size:.6rem;opacity:.6;margin-top:2px}
+.chat-inp{display:flex;gap:.5rem;padding:.7rem 1rem;border-top:1px solid var(--border);background:var(--bg2)}
+.chat-inp input{flex:1;border-radius:20px;padding:.55rem 1rem}
+.pub-prof{min-height:100vh;background:var(--bg);padding-top:62px;display:none}
+/* LB FILTERS */
+.lb-filters{display:flex;gap:.4rem;flex-wrap:wrap;margin-bottom:1.25rem}
+.lf{padding:.35rem .85rem;font-size:.72rem;font-weight:700;border:1px solid var(--border);background:transparent;color:var(--muted);cursor:pointer;font-family:'DM Sans',sans-serif;letter-spacing:.06em;text-transform:uppercase;transition:all .2s;border-radius:4px}
+.lf.on{border-color:var(--pk);color:var(--pk3);background:var(--pkp)}
+/* ANIMATIONS */
+.reveal{opacity:0;transform:translateY(22px);transition:opacity .65s,transform .65s}
+.reveal.vis{opacity:1;transform:translateY(0)}
+::-webkit-scrollbar{width:4px}::-webkit-scrollbar-thumb{background:var(--pk);border-radius:4px}
+@media(max-width:768px){nav{padding:.8rem 1.25rem}.nav-mid{display:none}.lb-hd,.lb-r{grid-template-columns:50px 1fr 80px}.lb-hd>:last-child,.lb-r>:last-child{display:none}.section{padding:4rem 1.5rem}}
+</style>
+</head>
+<body>
+
+<div class="conn" id="conn"><div class="conn-ring"></div><div class="conn-logo">ProofLayer</div></div>
+<div class="toast" id="toast"></div>
+
+<nav>
+  <div class="logo">
+    <svg class="logo-icon" viewBox="0 0 32 32" fill="none" xmlns="http://www.w3.org/2000/svg">
+      <rect width="32" height="32" rx="8" fill="url(#lg1)"/>
+      <path d="M8 16L13 21L24 10" stroke="white" stroke-width="2.5" stroke-linecap="round" stroke-linejoin="round"/>
+      <circle cx="16" cy="16" r="10" stroke="white" stroke-width="1.5" opacity="0.3"/>
+      <defs><linearGradient id="lg1" x1="0" y1="0" x2="32" y2="32"><stop stop-color="#e040fb"/><stop offset="1" stop-color="#9c27b0"/></linearGradient></defs>
+    </svg>
+    ProofLayer
+  </div>
+  <div class="nav-mid" id="navMid">
+    <span class="nl" onclick="goto('#features')">Features</span>
+    <span class="nl" onclick="goto('#leaderboard')">Leaderboard</span>
+    <span class="nl" onclick="goto('#how')">How It Works</span>
+  </div>
+  <div class="nav-r" id="navR">
+    <button class="btn btn-pk" onclick="connectWallet()">🔮 Connect Wallet</button>
+  </div>
+</nav>
+
+<!-- LANDING -->
+<div id="landing">
+<section class="hero">
+  <div class="h-bg"><div class="hgrid"></div><div class="hg1"></div><div class="hg2"></div></div>
+  <div class="h-in">
+    <div class="h-pill"><span class="pdot"></span>Live on Solana · Home of Web3 Proof</div>
+    <h1 class="h-h1">Your Work.<br>Your Proof.<em>Your Reputation.</em></h1>
+    <p class="h-p">ProofLayer is the <strong>decentralized contribution layer</strong> for Web3 builders. Log your threads, code, designs and DAO votes. Build a verifiable on-chain reputation. <strong>Get discovered. Get hired. Get recognised.</strong></p>
+    <div class="h-acts">
+      <button class="btn btn-pk" onclick="connectWallet()">🔮 Connect Phantom Wallet</button>
+      <button class="btn btn-out" onclick="goto('#leaderboard')">View Leaderboard</button>
+    </div>
+    <div class="h-stats">
+      <div><span class="hstat-n" data-target="2400">0</span><div class="hstat-l">Contributors</div></div>
+      <div><span class="hstat-n" data-target="18400">0</span><div class="hstat-l">Contributions</div></div>
+      <div><span class="hstat-n" data-target="340">0</span><div class="hstat-l">DAOs Tracked</div></div>
+    </div>
+  </div>
+</section>
+
+<div class="ticker-wrap"><div class="ticker-in" id="ticker">
+  <span class="ti">⚡ Thread Contributions <span class="ts">✦</span></span><span class="ti">🏆 Live Leaderboard <span class="ts">✦</span></span><span class="ti">🔮 Phantom Wallet Auth <span class="ts">✦</span></span><span class="ti">🏅 On-Chain Badges <span class="ts">✦</span></span><span class="ti">💬 Builder Messaging <span class="ts">✦</span></span><span class="ti">🏛️ DAO Participation <span class="ts">✦</span></span><span class="ti">🎨 Design Tracking <span class="ts">✦</span></span><span class="ti">💻 Code Contributions <span class="ts">✦</span></span><span class="ti">🔗 Shareable Profiles <span class="ts">✦</span></span><span class="ti">🌐 Built on Solana <span class="ts">✦</span></span>
+  <span class="ti">⚡ Thread Contributions <span class="ts">✦</span></span><span class="ti">🏆 Live Leaderboard <span class="ts">✦</span></span><span class="ti">🔮 Phantom Wallet Auth <span class="ts">✦</span></span><span class="ti">🏅 On-Chain Badges <span class="ts">✦</span></span><span class="ti">💬 Builder Messaging <span class="ts">✦</span></span><span class="ti">🏛️ DAO Participation <span class="ts">✦</span></span><span class="ti">🎨 Design Tracking <span class="ts">✦</span></span><span class="ti">💻 Code Contributions <span class="ts">✦</span></span><span class="ti">🔗 Shareable Profiles <span class="ts">✦</span></span><span class="ti">🌐 Built on Solana <span class="ts">✦</span></span>
+</div></div>
+
+<section class="section" id="features" style="background:var(--bg2)">
+  <div class="s-in">
+    <div class="sec-k reveal">What ProofLayer Does</div>
+    <h2 class="sec-h reveal">The Contribution Layer<br>Web3 Has Been Missing</h2>
+    <div class="fg">
+      <div class="fc reveal"><div class="fc-n">01</div><span class="fc-i">🔗</span><div class="fc-h">Shareable Profiles</div><div class="fc-p">Every user gets a public profile link. Share with DAOs and recruiters. They see your full verified contribution history instantly.</div></div>
+      <div class="fc reveal"><div class="fc-n">02</div><span class="fc-i">🏠</span><div class="fc-h">Live Feed</div><div class="fc-p">A real-time social feed of contributions. Like, comment and discover what the community is building across Solana.</div></div>
+      <div class="fc reveal"><div class="fc-n">03</div><span class="fc-i">💬</span><div class="fc-h">Builder Messaging</div><div class="fc-p">Direct message any contributor. DAOs reach builders. Developers connect with designers. Networking built into your reputation layer.</div></div>
+      <div class="fc reveal"><div class="fc-n">04</div><span class="fc-i">✍️</span><div class="fc-h">Thread +10pts</div><div class="fc-p">Log educational threads, blog posts and X content with verified proof links.</div><span class="fc-pts">+10 PTS EACH</span></div>
+      <div class="fc reveal"><div class="fc-n">05</div><span class="fc-i">💻</span><div class="fc-h">Code +20pts</div><div class="fc-p">GitHub PRs, open source commits, smart contracts and Anchor programs.</div><span class="fc-pts">+20 PTS EACH</span></div>
+      <div class="fc reveal"><div class="fc-n">06</div><span class="fc-i">🎨</span><div class="fc-h">Design +15pts</div><div class="fc-p">UI/UX, branding, motion design, NFT art and Figma files.</div><span class="fc-pts">+15 PTS EACH</span></div>
+    </div>
+  </div>
+</section>
+
+<section class="section" id="how">
+  <div class="s-in" style="text-align:center;max-width:800px;margin:0 auto">
+    <div class="sec-k reveal" style="justify-content:center">Simple Process</div>
+    <h2 class="sec-h reveal">Zero to Reputation in 3 Steps</h2>
+    <div style="display:grid;grid-template-columns:repeat(auto-fit,minmax(200px,1fr));gap:2.5rem;margin-top:3.5rem">
+      <div class="reveal"><div style="width:64px;height:64px;background:linear-gradient(135deg,var(--pk),var(--pk2));border-radius:50%;display:flex;align-items:center;justify-content:center;font-family:'Bebas Neue',sans-serif;font-size:1.7rem;color:#fff;margin:0 auto 1.5rem;box-shadow:0 0 0 8px var(--bg),0 0 0 10px var(--pkb)">1</div><div style="font-family:'Bebas Neue',sans-serif;font-size:1.2rem;color:#fff;margin-bottom:.6rem">Connect Phantom</div><div style="font-size:.83rem;color:var(--muted);line-height:1.75">Connect your Phantom wallet and sign a message to prove ownership. Your wallet becomes your permanent identity.</div></div>
+      <div class="reveal"><div style="width:64px;height:64px;background:linear-gradient(135deg,var(--pk),var(--pk2));border-radius:50%;display:flex;align-items:center;justify-content:center;font-family:'Bebas Neue',sans-serif;font-size:1.7rem;color:#fff;margin:0 auto 1.5rem;box-shadow:0 0 0 8px var(--bg),0 0 0 10px var(--pkb)">2</div><div style="font-family:'Bebas Neue',sans-serif;font-size:1.2rem;color:#fff;margin-bottom:.6rem">Log Contributions</div><div style="font-size:.83rem;color:var(--muted);line-height:1.75">Submit threads, code, designs and DAO votes with verified proof links. Each is checked and timestamped permanently.</div></div>
+      <div class="reveal"><div style="width:64px;height:64px;background:linear-gradient(135deg,var(--pk),var(--pk2));border-radius:50%;display:flex;align-items:center;justify-content:center;font-family:'Bebas Neue',sans-serif;font-size:1.7rem;color:#fff;margin:0 auto 1.5rem;box-shadow:0 0 0 8px var(--bg),0 0 0 10px var(--pkb)">3</div><div style="font-family:'Bebas Neue',sans-serif;font-size:1.2rem;color:#fff;margin-bottom:.6rem">Share & Get Hired</div><div style="font-size:.83rem;color:var(--muted);line-height:1.75">Share your profile link. DAOs browse the leaderboard. Your on-chain reputation works for you 24/7.</div></div>
+    </div>
+  </div>
+</section>
+
+<section class="section" id="leaderboard" style="background:var(--bg2)">
+  <div class="s-in">
+    <div class="sec-k reveal">Live Rankings</div>
+    <h2 class="sec-h reveal">Real Contributors.<br>Real Reputation.</h2>
+    <p class="sec-p reveal" style="max-width:480px">Every score earned through verified contributions. No shortcuts.</p>
+    <div class="lb-wrap reveal">
+      <div class="lb-hd"><div>Rank</div><div>Contributor</div><div>Score</div><div>Badges</div></div>
+      <div id="landingLb"><div class="lb-empty">Connect your wallet to see the live leaderboard.</div></div>
+    </div>
+    <div style="text-align:center;margin-top:1.75rem"><button class="btn btn-pk" onclick="connectWallet()">Connect Wallet to Join →</button></div>
+  </div>
+</section>
+
+<div style="background:linear-gradient(135deg,#1a002a,#0d0018);padding:7rem 2rem;text-align:center;position:relative;overflow:hidden;border-top:1px solid var(--pkb)">
+  <div style="position:absolute;top:50%;left:50%;transform:translate(-50%,-50%);font-family:'Bebas Neue',sans-serif;font-size:16rem;color:rgba(224,64,251,0.05);pointer-events:none;white-space:nowrap">PROOF</div>
+  <h2 style="font-family:'Bebas Neue',sans-serif;font-size:clamp(2.5rem,7vw,5.5rem);color:#fff;line-height:.9;position:relative">Stop Building<br>in the Dark.</h2>
+  <p style="color:var(--muted);font-size:1rem;margin:2rem auto;max-width:500px;position:relative;line-height:1.75">Your contributions deserve to be seen and owned. Connect your wallet and start building your on-chain legacy today.</p>
+  <button class="btn btn-pk" style="font-size:.9rem;padding:.85rem 2.2rem;position:relative" onclick="connectWallet()">🔮 Connect Wallet — Free</button>
+  <div style="margin-top:2rem;font-size:.72rem;color:var(--muted);letter-spacing:.12em;position:relative">NO GAS FEES · PHANTOM ONLY · BUILT ON SOLANA</div>
+</div>
+<footer style="background:var(--bg);padding:2.5rem 2rem;display:flex;align-items:center;justify-content:space-between;flex-wrap:wrap;gap:1rem;border-top:1px solid var(--border)">
+  <div style="display:flex;align-items:center;gap:.6rem;font-family:'Bebas Neue',sans-serif;font-size:1.4rem;background:linear-gradient(135deg,var(--pk),var(--pk3));-webkit-background-clip:text;-webkit-text-fill-color:transparent">
+    <svg width="24" height="24" viewBox="0 0 32 32" fill="none"><rect width="32" height="32" rx="8" fill="url(#lg2)"/><path d="M8 16L13 21L24 10" stroke="white" stroke-width="2.5" stroke-linecap="round" stroke-linejoin="round"/><circle cx="16" cy="16" r="10" stroke="white" stroke-width="1.5" opacity="0.3"/><defs><linearGradient id="lg2" x1="0" y1="0" x2="32" y2="32"><stop stop-color="#e040fb"/><stop offset="1" stop-color="#9c27b0"/></linearGradient></defs></svg>
+    ProofLayer
+  </div>
+  <div style="font-size:.72rem;color:var(--muted)">© 2025 ProofLayer · Built on Solana</div>
+</footer>
+</div><!-- end landing -->
+
+<!-- DASHBOARD -->
+<div class="dash" id="dashboard">
+  <div class="bnav" id="bnav"><div class="bni-wrap">
+    <div class="bni on" id="bn-feed" onclick="showPage('feed')"><span class="bni-icon">🏠</span>Feed</div>
+    <div class="bni" id="bn-lb" onclick="showPage('lb')"><span class="bni-icon">🏆</span>Ranks</div>
+    <div class="bni" id="bn-submit" onclick="showPage('submit')"><span class="bni-icon">➕</span>Submit</div>
+    <div class="bni" id="bn-messages" onclick="showPage('messages')"><span class="bni-icon">💬</span>Messages<div class="badge-dot" id="msgDot"></div></div>
+    <div class="bni" id="bn-me" onclick="showPage('me')"><span class="bni-icon">👤</span>Profile</div>
+  </div></div>
+
+  <div class="page on" id="page-feed">
+    <div class="feed-top"><div class="feed-title">🏠 Feed</div><button class="btn btn-pk btn-sm" onclick="showPage('submit')">+ Submit</button></div>
+    <div id="feedContent"><div style="text-align:center;padding:3rem;color:var(--muted)">Loading feed...</div></div>
+  </div>
+
+  <div class="page" id="page-lb">
+    <div style="font-family:'Bebas Neue',sans-serif;font-size:1.7rem;color:#fff;letter-spacing:.05em;margin-bottom:1rem">🏆 Leaderboard</div>
+    <div class="lb-filters">
+      <button class="lf on" onclick="setLbF('all',this)">All</button>
+      <button class="lf" onclick="setLbF('code',this)">Developers</button>
+      <button class="lf" onclick="setLbF('design',this)">Designers</button>
+      <button class="lf" onclick="setLbF('thread',this)">Writers</button>
+      <button class="lf" onclick="setLbF('dao',this)">DAO</button>
+    </div>
+    <div class="lb-wrap"><div class="lb-hd"><div>Rank</div><div>Contributor</div><div>Score</div><div>Badges</div></div><div id="lbContent"><div class="lb-empty">Loading...</div></div></div>
+  </div>
+
+  <div class="page" id="page-submit">
+    <div style="font-family:'Bebas Neue',sans-serif;font-size:1.7rem;color:#fff;letter-spacing:.05em;margin-bottom:1.25rem">➕ Submit Contribution</div>
+    <div class="sub-card">
+      <div class="fg2"><label>Title</label><input type="text" id="fTitle" placeholder="e.g. Wrote Solana staking guide on X"/></div>
+      <div class="fg2"><label>Type</label><select id="fType"><option value="thread">✍️ Thread / Content (+10 pts)</option><option value="design">🎨 Design / Creative (+15 pts)</option><option value="code">💻 Code / Development (+20 pts)</option><option value="dao">🏛️ DAO Participation (+10 pts)</option><option value="event">🎪 Event Attendance (+5 pts)</option></select></div>
+      <div class="fg2"><label>Proof Link (must be a real URL)</label><input type="url" id="fLink" placeholder="https://x.com/yourthread or github.com/yourPR"/></div>
+      <div class="fg2"><label>Description (optional)</label><textarea id="fDesc" placeholder="Brief description of this contribution..."></textarea></div>
+      <button class="btn btn-pk" style="width:100%;justify-content:center" onclick="submitContrib()">🚀 Submit & Earn Points</button>
+    </div>
+  </div>
+
+  <div class="page" id="page-messages">
+    <div style="font-family:'Bebas Neue',sans-serif;font-size:1.7rem;color:#fff;letter-spacing:.05em;margin-bottom:1rem">💬 Messages</div>
+    <div id="msgList"><div style="text-align:center;padding:3rem;color:var(--muted)"><div style="font-size:2rem;margin-bottom:.75rem">💬</div>No messages yet.<br><span style="font-size:.83rem">Tap a contributor in the feed or leaderboard to message them.</span></div></div>
+  </div>
+
+  <div class="page" id="page-me">
+    <div class="p-hero">
+      <div class="p-big-av" id="myAva" style="background:var(--pk)">?</div>
+      <div class="p-name" id="myName">—</div>
+      <div class="p-wlt" id="myWlt">—</div>
+      <div class="p-bio" id="myBio">Building reputation on Solana.</div>
+      <div class="p-handles" id="myHandles"></div>
+      <div class="p-stats">
+        <div><span class="p-sv" id="myScore">0</span><div class="p-sl">Score</div></div>
+        <div><span class="p-sv" id="myContribs">0</span><div class="p-sl">Contributions</div></div>
+        <div><span class="p-sv" id="myBadgeCount">0</span><div class="p-sl">Badges</div></div>
+      </div>
+      <div class="p-acts">
+        <button class="btn btn-pk btn-sm" onclick="openEditModal()">✏️ Edit Profile</button>
+        <button class="btn btn-gh btn-sm" onclick="copyShareLink()">🔗 Share Profile</button>
+      </div>
+    </div>
+    <div style="padding:1.25rem 1.5rem;padding-bottom:90px">
+      <div class="share-box"><div class="share-url" id="shareUrl">—</div><button class="btn btn-pk btn-xs" onclick="copyShareLink()">Copy</button></div>
+      <div class="ptabs"><div class="ptab on" onclick="showPTab('c',this)">Contributions</div><div class="ptab" onclick="showPTab('b',this)">Badges</div></div>
+      <div id="myContribTab"></div>
+      <div id="myBadgeTab" style="display:none"><div class="bg-grid" id="myBadgesGrid"></div></div>
+    </div>
+  </div>
+</div>
+
+<!-- CHAT -->
+<div class="chat-win" id="chatWin">
+  <div class="chat-head">
+    <button class="chat-back" onclick="closeChat()">←</button>
+    <div class="av" id="chatAv" style="background:var(--pk);width:34px;height:34px;font-size:.75rem">?</div>
+    <div><div style="font-weight:700;font-size:.85rem;color:#fff" id="chatName">—</div><div style="font-size:.67rem;color:var(--muted)" id="chatWlt">—</div></div>
+  </div>
+  <div class="chat-msgs" id="chatMsgs"><div style="text-align:center;color:var(--muted);font-size:.82rem;padding:2rem">Say hello! 👋</div></div>
+  <div class="chat-inp"><input type="text" id="chatInput" placeholder="Type a message..." onkeydown="if(event.key==='Enter')sendMsg()"/><button class="btn btn-pk btn-sm" onclick="sendMsg()">Send</button></div>
+</div>
+
+<!-- PUBLIC PROFILE -->
+<div class="pub-prof" id="pubProf">
+  <div class="p-hero">
+    <div class="p-big-av" id="pubAva" style="background:var(--pk)">?</div>
+    <div class="p-name" id="pubName">—</div>
+    <div class="p-wlt" id="pubWlt">—</div>
+    <div class="p-bio" id="pubBio">—</div>
+    <div class="p-handles" id="pubHandles"></div>
+    <div class="p-stats">
+      <div><span class="p-sv" id="pubScore">0</span><div class="p-sl">Score</div></div>
+      <div><span class="p-sv" id="pubC">0</span><div class="p-sl">Contributions</div></div>
+      <div><span class="p-sv" id="pubB">0</span><div class="p-sl">Badges</div></div>
+    </div>
+    <div class="p-acts"><button class="btn btn-pk btn-sm" onclick="connectWallet()">🔮 Connect Wallet</button></div>
+  </div>
+  <div style="max-width:680px;margin:0 auto;padding:1.5rem">
+    <div style="font-family:'Bebas Neue',sans-serif;font-size:1.3rem;color:#fff;letter-spacing:.05em;margin-bottom:1rem">Contributions</div>
+    <div id="pubContribList"></div>
+  </div>
+</div>
+
+<!-- EDIT MODAL -->
+<div class="mb" id="editModal">
+  <div class="modal">
+    <div class="mh"><div class="mt">Edit Profile</div><button class="mc" onclick="closeEditModal()">×</button></div>
+    <div class="mbody">
+      <div class="fg2"><label>Username</label><input type="text" id="eUser" placeholder="Your display name"/></div>
+      <div class="fg2"><label>Bio</label><textarea id="eBio" placeholder="Tell the ecosystem who you are..."></textarea></div>
+      <div class="fg2"><label>X (Twitter) Handle</label><input type="text" id="eX" placeholder="@yourhandle"/></div>
+      <div class="fg2"><label>Telegram Handle</label><input type="text" id="eTg" placeholder="@yourtelegram"/></div>
+      <div class="fg2"><label>GitHub Username</label><input type="text" id="eGh" placeholder="yourgithub"/></div>
+      <button class="btn btn-pk" style="width:100%;justify-content:center" onclick="saveProfile()">Save Changes</button>
+    </div>
+  </div>
+</div>
+
+<!-- VIEW PROFILE MODAL -->
+<div class="mb" id="viewModal">
+  <div class="modal">
+    <div class="mh"><div class="mt" id="vmTitle">Profile</div><button class="mc" onclick="closeVM()">×</button></div>
+    <div class="mbody" id="vmBody"></div>
+  </div>
+</div>
+
+<script>
+// ════ BS58 INLINE ════
+const bs58=(()=>{const A='123456789ABCDEFGHJKLMNPQRSTUVWXYZabcdefghijkmnopqrstuvwxyz',B=58,iF=Math.log(256)/Math.log(B);function encode(s){if(!(s instanceof Uint8Array))s=new Uint8Array(s);if(!s.length)return'';let z=0;while(z<s.length&&s[z]===0)z++;const sz=Math.ceil((s.length-z)*iF)+1,b=new Uint8Array(sz);let l=0;for(let i=z;i<s.length;i++){let c=s[i],j=0;for(let it=sz-1;c||j<l;it--,j++){c+=256*b[it];b[it]=c%B;c=Math.floor(c/B);}l=j;}let it=sz-l;while(it<sz&&b[it]===0)it++;return A[0].repeat(z)+[...b.slice(it)].map(x=>A[x]).join('');}function decode(str){if(!str.length)return new Uint8Array(0);let z=0;while(z<str.length&&str[z]===A[0])z++;const sz=Math.ceil((str.length-z)*Math.log(B)/Math.log(256))+1,b=new Uint8Array(sz);let l=0;for(let i=z;i<str.length;i++){let c=A.indexOf(str[i]);if(c<0)throw new Error('Invalid');let j=0;for(let it=sz-1;c||j<l;it--,j++){c+=B*b[it];b[it]=c%256;c=Math.floor(c/256);}l=j;}let it=sz-l;while(it<sz&&b[it]===0)it++;return b.slice(it-z);}return{encode,decode};})();
+
+// ════ CONFIG ════
+const API='https://prooflayer-backend.onrender.com';
+let socket=null;
+
+// ════ STATE ════
+const S={wallet:'',token:'',username:'',bio:'',score:0,badges:[],contributions:[],scoreBreakdown:{},xHandle:'',tgHandle:'',ghHandle:'',chatWith:null,lbFilter:'all',inbox:[]};
+const TM={thread:{emoji:'✍️',label:'Thread',pts:10,color:'#60a5fa',domain:'x.com / twitter.com'},design:{emoji:'🎨',label:'Design',pts:15,color:'#f472b6',domain:'figma.com / behance.net'},code:{emoji:'💻',label:'Code',pts:20,color:'#a78bfa',domain:'github.com'},dao:{emoji:'🏛️',label:'DAO',pts:10,color:'#34d399',domain:'realms.today / snapshot.org'},event:{emoji:'🎪',label:'Event',pts:5,color:'#fbbf24',domain:'lu.ma / eventbrite.com'}};
+const COLORS=['#e040fb','#9c27b0','#7b1fa2','#6a1b9a','#4a148c','#ab47bc','#ba68c8','#ce93d8'];
+const wC=w=>COLORS[(parseInt(w?.slice(-2)||'0',16)||0)%COLORS.length];
+const sw=w=>w?w.slice(0,4)+'...'+w.slice(-4):'—';
+const ini=n=>(n||'?').slice(0,2).toUpperCase();
+function ago(d){const s=Math.floor((Date.now()-new Date(d))/1000);if(s<60)return'just now';if(s<3600)return Math.floor(s/60)+'m ago';if(s<86400)return Math.floor(s/3600)+'h ago';return Math.floor(s/86400)+'d ago';}
+function getDomain(url){try{return new URL(url).hostname.replace('www.','')}catch{return url}}
+
+// ════ TOAST ════
+function toast(m){const t=document.getElementById('toast');t.textContent=m;t.classList.add('on');setTimeout(()=>t.classList.remove('on'),4000);}
+function showConn(on){document.getElementById('conn').classList.toggle('on',on);}
+
+// ════ SCROLL REVEAL ════
+function goto(id){document.querySelector(id)?.scrollIntoView({behavior:'smooth'});}
+const obs=new IntersectionObserver(es=>es.forEach(e=>{if(e.isIntersecting){e.target.classList.add('vis');e.target.querySelectorAll('[data-target]').forEach(n=>countUp(n));if(e.target.dataset?.target)countUp(e.target);}}),{threshold:.12});
+document.querySelectorAll('.reveal,[data-target]').forEach(el=>obs.observe(el));
+function countUp(el){const t=+el.dataset.target;if(!t)return;const st=performance.now(),dur=2000;const go=ts=>{const p=Math.min((ts-st)/dur,1),e=1-Math.pow(1-p,4);el.textContent=Math.floor(e*t).toLocaleString();if(p<1)requestAnimationFrame(go);else el.textContent=t.toLocaleString();};requestAnimationFrame(go);}
+document.getElementById('ticker').appendChild(document.getElementById('ticker').cloneNode(true));
+
+// ════ SOCKET.IO ════
+function initSocket(){
+  if(!S.token)return;
+  socket=io(API,{auth:{token:S.token},transports:['websocket','polling']});
+  socket.on('connect',()=>console.log('Socket connected'));
+  socket.on('new_contribution',(c)=>{
+    // Prepend to feed in real time
+    const el=document.getElementById('feedContent');
+    if(el&&document.getElementById('page-feed').classList.contains('on')){
+      const existing=el.querySelector('.post');
+      const newPost=document.createElement('div');
+      newPost.innerHTML=renderPost(c);
+      if(existing)el.insertBefore(newPost.firstChild,existing);
+      else el.innerHTML=renderPost(c);
+    }
+  });
+  socket.on('new_message',(msg)=>{
+    if(S.chatWith?.wallet===msg.from){
+      appendChatBubble(msg,false);
+    }
+    document.getElementById('msgDot').classList.add('on');
+    loadInbox();
+  });
+  socket.on('reaction_update',(data)=>{
+    const lc=document.querySelector(`#lc-${data.contributionId}`);
+    if(lc)lc.textContent=data.count;
+  });
+  socket.on('new_comment',(data)=>{
+    const cc=document.querySelector(`#cc-${data.contributionId}`);
+    if(cc)cc.textContent=data.count;
+  });
+  socket.on('contribution_deleted',(data)=>{
+    const el=document.getElementById('post-'+data.contributionId);
+    if(el)el.remove();
+  });
+}
+
+// Wake backend silently
+window.addEventListener('load',()=>{fetch(API+'/health').catch(()=>{});checkRoute();});
+
+// ════ WALLET CONNECT ════
+async function connectWallet(){
+  const provider=window.phantom?.solana??window.solana;
+  if(!provider?.isPhantom){toast('Open this site inside the Phantom app — tap the 🌐 globe icon in Phantom');return;}
+  showConn(true);
+  try{
+    const conn=await provider.connect();
+    const wallet=conn.publicKey.toString();
+    const nr=await fetch(API+'/api/auth/nonce',{method:'POST',headers:{'Content-Type':'application/json'},body:JSON.stringify({walletAddress:wallet}),signal:AbortSignal.timeout(70000)});
+    const nj=await nr.json();
+    if(!nj.success)throw new Error(nj.message);
+    const signed=await provider.signMessage(new TextEncoder().encode(nj.data.message),'utf8');
+    const vr=await fetch(API+'/api/auth/verify',{method:'POST',headers:{'Content-Type':'application/json'},body:JSON.stringify({walletAddress:wallet,signature:bs58.encode(signed.signature)}),signal:AbortSignal.timeout(30000)});
+    const vj=await vr.json();
+    if(!vj.success)throw new Error(vj.message);
+    const{token,user}=vj.data;
+    S.wallet=wallet;S.token=token;
+    S.username=user.username||sw(wallet);
+    S.score=user.reputationScore||0;S.badges=user.badges||[];
+    await loadMyData();
+    initSocket();
+    showConn(false);
+    showDash();
+    toast('Welcome back, '+S.username+'! 👋');
+  }catch(err){
+    showConn(false);
+    if(err.code===4001)toast('Connection cancelled');
+    else if(err.message?.includes('signMessage'))toast('Signature cancelled');
+    else if(err.message?.includes('Load failed')||err.message?.includes('fetch'))toast('Connection timed out — please try again');
+    else toast(err.message||'Could not connect');
+  }
+}
+
+function disconnectWallet(){
+  if(socket){socket.disconnect();socket=null;}
+  const p=window.phantom?.solana??window.solana;
+  if(p?.disconnect)p.disconnect();
+  Object.assign(S,{wallet:'',token:'',username:'',score:0,badges:[],contributions:[],inbox:[]});
+  document.getElementById('dashboard').classList.remove('on');
+  document.getElementById('bnav').classList.remove('on');
+  document.getElementById('landing').style.display='block';
+  document.getElementById('navMid').style.display='';
+  document.getElementById('navR').innerHTML='<button class="btn btn-pk" onclick="connectWallet()">🔮 Connect Wallet</button>';
+  toast('Disconnected');
+}
+
+function showDash(){
+  document.getElementById('landing').style.display='none';
+  document.getElementById('dashboard').classList.add('on');
+  document.getElementById('bnav').classList.add('on');
+  document.getElementById('navMid').style.display='none';
+  document.getElementById('navR').innerHTML=`<span style="font-family:'JetBrains Mono',monospace;font-size:.68rem;color:var(--muted)">${sw(S.wallet)}</span><button class="btn btn-gh btn-sm" onclick="disconnectWallet()">Disconnect</button>`;
+  updateMyProfile();loadFeed();loadLeaderboard();loadInbox();
+}
+
+// ════ LOAD DATA ════
+async function loadMyData(){
+  try{
+    const h={'Authorization':'Bearer '+S.token};
+    const[cr,mr]=await Promise.all([fetch(API+'/api/contributions/my',{headers:h}),fetch(API+'/api/auth/me',{headers:h})]);
+    const cj=await cr.json(),mj=await mr.json();
+    if(cj.success)S.contributions=cj.data;
+    if(mj.success){S.username=mj.data.username;S.bio=mj.data.bio||'';S.score=mj.data.reputationScore;S.badges=mj.data.badges||[];S.scoreBreakdown=mj.data.scoreBreakdown||{};try{const x=JSON.parse(mj.data.avatar||'{}');S.xHandle=x.x||'';S.tgHandle=x.tg||'';S.ghHandle=x.gh||'';}catch(e){}}
+  }catch(e){}
+}
+
+// ════ FEED ════
+async function loadFeed(){
+  const el=document.getElementById('feedContent');
+  try{
+    const res=await fetch(API+'/api/contributions/feed?limit=50');
+    const j=await res.json();
+    const items=j.success?j.data:[];
+    if(!items.length){el.innerHTML=`<div style="text-align:center;padding:3rem;color:var(--muted)"><div style="font-size:2.5rem;margin-bottom:1rem">🌱</div><strong style="color:var(--text)">No contributions yet.</strong><br>Be the first to submit!<br><br><button class="btn btn-pk btn-sm" onclick="showPage('submit')">+ Submit First Contribution</button></div>`;return;}
+    // Load reactions for all posts
+    const ids=items.map(i=>i._id.toString());
+    let reactions={};
+    try{
+      const rr=await fetch(API+'/api/reactions/bulk',{method:'POST',headers:{'Content-Type':'application/json','Authorization':'Bearer '+S.token},body:JSON.stringify({ids})});
+      const rj=await rr.json();
+      if(rj.success)reactions=rj.data;
+    }catch(e){}
+    el.innerHTML=items.map(item=>renderPost(item,reactions[item._id])).join('');
+  }catch(e){el.innerHTML='<div style="text-align:center;padding:2rem;color:var(--muted)">Could not load feed.</div>';}
+}
+
+// ════ RENDER POST ════
+function renderPost(c,reactions){
+  const t=TM[c.type]||{emoji:'📝',label:c.type,color:'#fff'};
+  const col=wC(c.walletAddress);
+  const id=c._id.toString();
+  const isOwner=c.walletAddress===S.wallet;
+  const lc=reactions?.likeCount||0;
+  const cc=reactions?.commentCount||0;
+  const liked=reactions?.likedByMe||false;
+  // Get platform icon for proof link
+  const domain=getDomain(c.proofLink);
+  const platformEmoji=domain.includes('x.com')||domain.includes('twitter')?'🐦':domain.includes('github')?'🐙':domain.includes('figma')?'🎨':domain.includes('realms')||domain.includes('snapshot')?'🏛️':domain.includes('lu.ma')||domain.includes('eventbrite')?'🎪':'🔗';
+  return`<div class="post" id="post-${id}">
+    <div class="post-top">
+      <div class="av" style="background:${col};width:38px;height:38px;font-size:.8rem;flex-shrink:0">${ini(c.username)}</div>
+      <div style="flex:1"><div class="post-uname" onclick="viewProfile('${c.walletAddress}')">${c.username}</div><div class="post-time">${ago(c.createdAt)}</div></div>
+      <span class="post-tag" style="color:${t.color};border-color:${t.color}30;background:${t.color}10">${t.emoji} ${t.label}</span>
+    </div>
+    <div class="post-body">
+      <div class="post-title">${c.title}</div>
+      ${c.description?`<div class="post-desc">${c.description}</div>`:''}
+      <a class="post-preview" href="${c.proofLink}" target="_blank" rel="noopener">
+        <span class="preview-icon">${platformEmoji}</span>
+        <div><div class="preview-domain">${domain}</div><div class="preview-label">Tap to view proof ↗</div></div>
+        <span class="preview-arrow">↗</span>
+      </a>
+    </div>
+    <div class="post-pts">+${c.points} pts ${c.verified?'<span class="verified-badge">✅ Verified</span>':''}</div>
+    <div class="post-acts">
+      <button class="pa ${liked?'liked':''}" onclick="toggleLike('${id}',this)"><span>${liked?'🩷':'🤍'}</span> <span id="lc-${id}">${lc}</span></button>
+      <button class="pa" onclick="toggleComments('${id}')"><span>💬</span> <span id="cc-${id}">${cc}</span></button>
+      <button class="pa" onclick="shareProfile('${c.walletAddress}')"><span>🔗</span> Share</button>
+      ${isOwner?`<button class="pa pa-red" onclick="deleteContrib('${id}')"><span>🗑️</span></button>`:''}
+    </div>
+    <div class="cw" id="cw-${id}">
+      <div id="cl-${id}" style="margin-bottom:.5rem"></div>
+      <div class="c-inp"><input type="text" placeholder="Write a comment..." id="ci-${id}" onkeydown="if(event.key==='Enter')addComment('${id}')"/><button class="btn btn-pk btn-xs" onclick="addComment('${id}')">Post</button></div>
+    </div>
+  </div>`;
+}
+
+// ════ LIKE ════
+async function toggleLike(id,btn){
+  if(!S.token){toast('Connect your wallet to like contributions');return;}
+  try{
+    const res=await fetch(API+'/api/reactions/like/'+id,{method:'POST',headers:{'Content-Type':'application/json','Authorization':'Bearer '+S.token}});
+    const j=await res.json();
+    if(!j.success)throw new Error(j.message);
+    const liked=j.data.liked;
+    btn.classList.toggle('liked',liked);
+    btn.querySelector('span').textContent=liked?'🩷':'🤍';
+    const lc=document.getElementById('lc-'+id);
+    if(lc)lc.textContent=j.data.count;
+  }catch(e){toast(e.message||'Could not like');}
+}
+
+// ════ COMMENT ════
+function toggleComments(id){document.getElementById('cw-'+id)?.classList.toggle('on');}
+
+async function addComment(id){
+  if(!S.token){toast('Connect your wallet to comment');return;}
+  const inp=document.getElementById('ci-'+id);
+  const txt=inp?.value?.trim();if(!txt)return;
+  try{
+    const res=await fetch(API+'/api/reactions/comment/'+id,{method:'POST',headers:{'Content-Type':'application/json','Authorization':'Bearer '+S.token},body:JSON.stringify({text:txt})});
+    const j=await res.json();
+    if(!j.success)throw new Error(j.message);
+    const cl=document.getElementById('cl-'+id);
+    const col=wC(S.wallet);
+    cl.innerHTML+=`<div class="cmt"><div class="c-av" style="background:${col}">${ini(S.username)}</div><div class="c-body"><div class="c-name">${S.username}</div><div class="c-text">${txt}</div></div></div>`;
+    inp.value='';
+    const cc=document.getElementById('cc-'+id);
+    if(cc)cc.textContent=j.data.count;
+  }catch(e){toast(e.message||'Could not post comment');}
+}
+
+// ════ DELETE CONTRIBUTION ════
+async function deleteContrib(id){
+  if(!confirm('Delete this contribution? Your score will be updated.'))return;
+  try{
+    const res=await fetch(API+'/api/contributions/'+id,{method:'DELETE',headers:{'Authorization':'Bearer '+S.token}});
+    const j=await res.json();
+    if(!j.success)throw new Error(j.message);
+    document.getElementById('post-'+id)?.remove();
+    S.score=j.data.newReputationScore;
+    S.contributions=S.contributions.filter(c=>c._id.toString()!==id);
+    await loadMyData();
+    updateMyProfile();
+    loadLeaderboard();
+    toast('Contribution deleted. Score updated.');
+  }catch(e){toast(e.message||'Could not delete');}
+}
+
+// ════ LEADERBOARD ════
+async function loadLeaderboard(){
+  const el=document.getElementById('lbContent');
+  const url=S.lbFilter==='all'?API+'/api/leaderboard':API+'/api/leaderboard?category='+S.lbFilter;
+  try{
+    const res=await fetch(url);const j=await res.json();
+    if(!j.success||!j.data.length){el.innerHTML='<div class="lb-empty">No contributors yet. Be the first!</div>';return;}
+    el.innerHTML=j.data.map((u,i)=>{
+      const rc=i===0?'g':i===1?'s':i===2?'b':'';const col=wC(u.walletAddress);
+      return`<div class="lb-r" onclick="viewProfile('${u.walletAddress}')"><div class="lb-rn ${rc}">${String(u.rank||i+1).padStart(2,'0')}</div><div class="lb-ui"><div class="av" style="background:${col}">${ini(u.username)}</div><div><div class="lb-nm">${u.username}</div><div class="lb-wl">${sw(u.walletAddress)}</div></div></div><div class="lb-sc">${u.reputationScore}</div><div class="lb-bd">${(u.badges||[]).slice(0,2).map(b=>`<span class="chip">${b.name||''}</span>`).join('')}</div></div>`;
+    }).join('');
+    document.getElementById('landingLb').innerHTML=j.data.slice(0,5).map((u,i)=>{
+      const rc=i===0?'g':i===1?'s':i===2?'b':'';const col=wC(u.walletAddress);
+      return`<div class="lb-r"><div class="lb-rn ${rc}">${String(u.rank||i+1).padStart(2,'0')}</div><div class="lb-ui"><div class="av" style="background:${col}">${ini(u.username)}</div><div><div class="lb-nm">${u.username}</div><div class="lb-wl">${sw(u.walletAddress)}</div></div></div><div class="lb-sc">${u.reputationScore}</div><div class="lb-bd">${(u.badges||[]).slice(0,1).map(b=>`<span class="chip">${b.name||''}</span>`).join('')}</div></div>`;
+    }).join('');
+  }catch(e){el.innerHTML='<div class="lb-empty">Could not load leaderboard.</div>';}
+}
+function setLbF(f,btn){S.lbFilter=f;document.querySelectorAll('.lf').forEach(b=>b.classList.remove('on'));btn.classList.add('on');loadLeaderboard();}
+
+// ════ SUBMIT ════
+async function submitContrib(){
+  const title=document.getElementById('fTitle').value.trim();
+  const type=document.getElementById('fType').value;
+  const link=document.getElementById('fLink').value.trim();
+  const desc=document.getElementById('fDesc').value.trim();
+  if(!title||!link){toast('Please fill in the title and proof link');return;}
+  if(!link.startsWith('http')){toast('Proof link must start with https://');return;}
+  showConn(true);
+  try{
+    const res=await fetch(API+'/api/contributions',{method:'POST',headers:{'Content-Type':'application/json','Authorization':'Bearer '+S.token},body:JSON.stringify({title,type,proofLink:link,description:desc})});
+    const data=await res.json();
+    if(!data.success)throw new Error(data.message);
+    const d=data.data;
+    S.score=d.newReputationScore;S.scoreBreakdown=d.scoreBreakdown;
+    if(d.newBadges?.length){S.badges.push(...d.newBadges);toast('🏅 New badge: '+d.newBadges.map(b=>b.name).join(', '));}
+    S.contributions.unshift(d.contribution);
+    document.getElementById('fTitle').value='';document.getElementById('fLink').value='';document.getElementById('fDesc').value='';
+    showConn(false);
+    toast('✅ +'+d.pointsAwarded+' pts! Now live on the feed.');
+    updateMyProfile();loadFeed();loadLeaderboard();
+    showPage('feed');
+  }catch(e){showConn(false);toast(e.message||'Could not submit — please check your proof link');}
+}
+
+// ════ MY PROFILE ════
+function updateMyProfile(){
+  const col=wC(S.wallet);
+  document.getElementById('myAva').style.background=col;document.getElementById('myAva').textContent=ini(S.username);
+  document.getElementById('myName').textContent=S.username||sw(S.wallet);
+  document.getElementById('myWlt').textContent=sw(S.wallet);
+  document.getElementById('myBio').textContent=S.bio||'Building reputation on Solana.';
+  document.getElementById('myScore').textContent=S.score;
+  document.getElementById('myContribs').textContent=S.contributions.length;
+  document.getElementById('myBadgeCount').textContent=S.badges.length;
+  const handles=[];
+  if(S.xHandle)handles.push(`<span class="handle">𝕏 ${S.xHandle}</span>`);
+  if(S.tgHandle)handles.push(`<span class="handle">✈️ ${S.tgHandle}</span>`);
+  if(S.ghHandle)handles.push(`<span class="handle">🐙 ${S.ghHandle}</span>`);
+  document.getElementById('myHandles').innerHTML=handles.join('');
+  document.getElementById('shareUrl').textContent=window.location.origin+window.location.pathname+'#profile/'+S.wallet;
+  const ct=document.getElementById('myContribTab');
+  ct.innerHTML=S.contributions.length?S.contributions.map(c=>{
+    const t=TM[c.type]||{emoji:'📝',label:c.type,color:'#fff'};
+    const domain=getDomain(c.proofLink);
+    return`<div class="post" style="margin-bottom:.75rem" id="post-${c._id}">
+      <div class="post-top">
+        <div class="av" style="background:${wC(S.wallet)};width:38px;height:38px;font-size:.8rem;flex-shrink:0">${ini(S.username)}</div>
+        <div style="flex:1"><div style="font-weight:700;font-size:.85rem;color:#fff">${S.username}</div><div style="font-size:.67rem;color:var(--muted)">${ago(c.createdAt)}</div></div>
+        <span class="post-tag" style="color:${t.color};border-color:${t.color}30;background:${t.color}10">${t.emoji} ${t.label}</span>
+      </div>
+      <div class="post-body">
+        <div class="post-title">${c.title}</div>
+        <a class="post-preview" href="${c.proofLink}" target="_blank" rel="noopener">
+          <span class="preview-icon">🔗</span>
+          <div><div class="preview-domain">${domain}</div><div class="preview-label">Tap to view proof ↗</div></div>
+          <span class="preview-arrow">↗</span>
+        </a>
+      </div>
+      <div class="post-pts">+${c.points} pts</div>
+      <div class="post-acts">
+        <button class="pa pa-red" onclick="deleteContrib('${c._id}')"><span>🗑️</span> Delete</button>
+      </div>
+    </div>`;
+  }).join(''):'<div style="text-align:center;padding:2rem;color:var(--muted)">No contributions yet. Go submit!</div>';
+  const bg=document.getElementById('myBadgesGrid');
+  bg.innerHTML=S.badges.length?S.badges.map(b=>`<div class="b-card"><span class="b-em">${b.emoji||'🏅'}</span><div class="b-nm">${b.name||b.id||'Badge'}</div><div class="b-desc">${b.description||''}</div></div>`).join(''):'<div style="color:var(--muted);font-size:.85rem;grid-column:1/-1;text-align:center;padding:2rem">No badges yet. Start contributing!</div>';
+}
+function showPTab(tab,el){document.querySelectorAll('.ptab').forEach(t=>t.classList.remove('on'));el.classList.add('on');document.getElementById('myContribTab').style.display=tab==='c'?'block':'none';document.getElementById('myBadgeTab').style.display=tab==='b'?'block':'none';}
+function copyShareLink(){const url=window.location.origin+window.location.pathname+'#profile/'+S.wallet;navigator.clipboard?.writeText(url).then(()=>toast('Profile link copied!')).catch(()=>prompt('Copy your profile link:',url));}
+function shareProfile(wallet){const url=window.location.origin+window.location.pathname+'#profile/'+wallet;navigator.clipboard?.writeText(url).then(()=>toast('Profile link copied!')).catch(()=>prompt('Copy:',url));}
+
+// ════ VIEW PROFILE MODAL ════
+async function viewProfile(walletAddr){
+  if(!walletAddr)return;
+  document.getElementById('vmTitle').textContent='Loading...';
+  document.getElementById('vmBody').innerHTML='<div style="text-align:center;padding:2rem;color:var(--muted)">Loading...</div>';
+  document.getElementById('viewModal').classList.add('on');
+  try{
+    const res=await fetch(API+'/api/users/'+walletAddr);const j=await res.json();
+    if(!j.success)throw new Error(j.message);
+    const u=j.data;const col=wC(walletAddr);
+    document.getElementById('vmTitle').textContent=u.username||sw(walletAddr);
+    let handles='';
+    try{const x=JSON.parse(u.avatar||'{}');if(x.x)handles+=`<span class="handle">𝕏 ${x.x}</span>`;if(x.tg)handles+=`<span class="handle">✈️ ${x.tg}</span>`;if(x.gh)handles+=`<span class="handle">🐙 ${x.gh}</span>`;}catch(e){}
+    const contribs=(u.recentContributions||[]).map(c=>{
+      const t=TM[c.type]||{emoji:'📝',label:c.type};const domain=getDomain(c.proofLink);
+      return`<a href="${c.proofLink}" target="_blank" rel="noopener" style="display:flex;gap:.75rem;padding:.7rem 0;border-bottom:1px solid var(--border);align-items:center;text-decoration:none">
+        <div>${t.emoji}</div>
+        <div style="flex:1"><div style="font-weight:700;font-size:.83rem;color:#fff">${c.title}</div><div style="font-size:.68rem;color:var(--muted)">${t.label} · ${domain} · ${ago(c.createdAt)}</div></div>
+        <div style="font-family:'Bebas Neue',sans-serif;font-size:1.1rem;color:var(--pk)">+${c.points}</div>
+      </a>`;
+    }).join('');
+    document.getElementById('vmBody').innerHTML=`
+      <div style="background:linear-gradient(135deg,var(--bg3),var(--bg2));padding:1.5rem;margin:-1.5rem -1.5rem 1.5rem;border-radius:8px 8px 0 0;position:relative;overflow:hidden">
+        <div style="position:absolute;top:-40px;right:-40px;width:180px;height:180px;background:radial-gradient(circle,rgba(224,64,251,0.2),transparent 70%)"></div>
+        <div style="width:58px;height:58px;border-radius:6px;background:${col};display:flex;align-items:center;justify-content:center;font-weight:800;font-size:1.3rem;color:#fff;margin-bottom:.75rem;position:relative">${ini(u.username)}</div>
+        <div style="font-family:'Bebas Neue',sans-serif;font-size:1.6rem;color:#fff;position:relative">${u.username||sw(walletAddr)}</div>
+        <div style="font-family:'JetBrains Mono',monospace;font-size:.67rem;color:var(--muted)">${sw(walletAddr)}</div>
+        ${u.bio?`<div style="font-size:.82rem;color:var(--muted);margin-top:.4rem">${u.bio}</div>`:''}
+        <div style="display:flex;gap:.4rem;flex-wrap:wrap;margin-top:.5rem">${handles}</div>
+        <div style="display:flex;gap:2rem;margin-top:1rem">
+          <div><div style="font-family:'Bebas Neue',sans-serif;font-size:1.8rem;background:linear-gradient(135deg,var(--pk),var(--pk3));-webkit-background-clip:text;-webkit-text-fill-color:transparent">${u.reputationScore||0}</div><div style="font-size:.62rem;color:var(--muted);text-transform:uppercase">Score</div></div>
+          <div><div style="font-family:'Bebas Neue',sans-serif;font-size:1.8rem;background:linear-gradient(135deg,var(--pk),var(--pk3));-webkit-background-clip:text;-webkit-text-fill-color:transparent">${u.contributionCount||0}</div><div style="font-size:.62rem;color:var(--muted);text-transform:uppercase">Contributions</div></div>
+          <div><div style="font-family:'Bebas Neue',sans-serif;font-size:1.8rem;background:linear-gradient(135deg,var(--pk),var(--pk3));-webkit-background-clip:text;-webkit-text-fill-color:transparent">#${u.rank||'—'}</div><div style="font-size:.62rem;color:var(--muted);text-transform:uppercase">Rank</div></div>
+        </div>
+      </div>
+      ${(u.badges||[]).length?`<div style="display:flex;gap:.3rem;flex-wrap:wrap;margin-bottom:1rem">${u.badges.map(b=>`<span class="chip">${b.name||''}</span>`).join('')}</div>`:''}
+      <div style="display:flex;gap:.5rem;margin-bottom:1rem">
+        ${S.token&&walletAddr!==S.wallet?`<button class="btn btn-pk btn-sm" onclick="openChat('${walletAddr}','${u.username||sw(walletAddr)}');closeVM()">💬 Message</button>`:''}
+        <button class="btn btn-gh btn-sm" onclick="shareProfile('${walletAddr}')">🔗 Share Profile</button>
+      </div>
+      <div style="font-family:'Bebas Neue',sans-serif;font-size:.95rem;color:#fff;letter-spacing:.05em;margin-bottom:.75rem">Recent Contributions</div>
+      ${contribs||'<div style="color:var(--muted);font-size:.83rem">No contributions yet.</div>'}`;
+  }catch(e){document.getElementById('vmBody').innerHTML='<div style="color:var(--pk);padding:1rem">'+e.message+'</div>';}
+}
+function closeVM(){document.getElementById('viewModal').classList.remove('on');}
+
+// ════ PUBLIC PROFILE ════
+async function loadPublicProfile(walletAddr){
+  document.getElementById('landing').style.display='none';
+  document.getElementById('dashboard').classList.remove('on');
+  document.getElementById('pubProf').style.display='block';
+  try{
+    const res=await fetch(API+'/api/users/'+walletAddr);const j=await res.json();
+    if(!j.success)throw new Error(j.message);
+    const u=j.data;const col=wC(walletAddr);
+    document.getElementById('pubAva').style.background=col;document.getElementById('pubAva').textContent=ini(u.username);
+    document.getElementById('pubName').textContent=u.username||sw(walletAddr);
+    document.getElementById('pubWlt').textContent=sw(walletAddr);
+    document.getElementById('pubBio').textContent=u.bio||'ProofLayer contributor';
+    document.getElementById('pubScore').textContent=u.reputationScore||0;
+    document.getElementById('pubC').textContent=u.contributionCount||0;
+    document.getElementById('pubB').textContent=(u.badges||[]).length;
+    let handles='';try{const x=JSON.parse(u.avatar||'{}');if(x.x)handles+=`<span class="handle">𝕏 ${x.x}</span>`;if(x.tg)handles+=`<span class="handle">✈️ ${x.tg}</span>`;if(x.gh)handles+=`<span class="handle">🐙 ${x.gh}</span>`;}catch(e){}
+    document.getElementById('pubHandles').innerHTML=handles;
+    const cl=document.getElementById('pubContribList');
+    const contribs=u.recentContributions||[];
+    cl.innerHTML=contribs.length?contribs.map(c=>{
+      const t=TM[c.type]||{emoji:'📝',label:c.type,color:'#fff'};const domain=getDomain(c.proofLink);
+      return`<div class="post" style="margin-bottom:.75rem">
+        <div class="post-top"><div class="av" style="background:${col};width:38px;height:38px;font-size:.8rem;flex-shrink:0">${ini(u.username)}</div><div style="flex:1"><div style="font-weight:700;font-size:.85rem;color:#fff">${u.username}</div><div style="font-size:.67rem;color:var(--muted)">${ago(c.createdAt)}</div></div><span class="post-tag" style="color:${t.color};border-color:${t.color}30;background:${t.color}10">${t.emoji} ${t.label}</span></div>
+        <div class="post-body"><div class="post-title">${c.title}</div><a class="post-preview" href="${c.proofLink}" target="_blank" rel="noopener"><span class="preview-icon">🔗</span><div><div class="preview-domain">${domain}</div><div class="preview-label">Tap to view proof ↗</div></div><span class="preview-arrow">↗</span></a></div>
+        <div class="post-pts">+${c.points} pts ${c.verified?'<span class="verified-badge">✅ Verified</span>':''}</div>
+      </div>`;
+    }).join(''):'<div style="text-align:center;padding:2rem;color:var(--muted)">No contributions yet.</div>';
+  }catch(e){document.getElementById('pubBio').textContent='Profile could not be loaded.';}
+}
+
+// ════ MESSAGES ════
+async function loadInbox(){
+  if(!S.token)return;
+  try{
+    const res=await fetch(API+'/api/messages/inbox',{headers:{'Authorization':'Bearer '+S.token}});
+    const j=await res.json();
+    if(!j.success)return;
+    S.inbox=j.data;
+    renderMsgList();
+    const unread=j.data.reduce((a,c)=>a+(c.unread||0),0);
+    document.getElementById('msgDot').classList.toggle('on',unread>0);
+  }catch(e){}
+}
+function renderMsgList(){
+  const el=document.getElementById('msgList');
+  if(!S.inbox.length){el.innerHTML='<div style="text-align:center;padding:3rem;color:var(--muted)"><div style="font-size:2rem;margin-bottom:.75rem">💬</div>No messages yet.<br><span style="font-size:.83rem">Tap a contributor to message them.</span></div>';return;}
+  el.innerHTML=S.inbox.map(conv=>{
+    const col=wC(conv.contactWallet);const last=conv.lastMessage;
+    return`<div class="msg-item" onclick="openChat('${conv.contactWallet}','${conv.contactUsername}')">
+      <div class="av" style="background:${col};width:40px;height:40px">${ini(conv.contactUsername)}</div>
+      <div style="flex:1;min-width:0"><div class="msg-nm">${conv.contactUsername}</div><div class="msg-prev">${last?.text||''}</div></div>
+      <div style="display:flex;flex-direction:column;align-items:flex-end;gap:.3rem">
+        <div class="msg-time">${ago(last?.createdAt)}</div>
+        ${conv.unread?`<div style="width:8px;height:8px;background:var(--pk);border-radius:50%"></div>`:''}
+      </div>
+    </div>`;
+  }).join('');
+}
+async function openChat(walletAddr,username){
+  if(!S.token){connectWallet();return;}
+  S.chatWith={wallet:walletAddr,username,color:wC(walletAddr)};
+  document.getElementById('chatAv').style.background=S.chatWith.color;
+  document.getElementById('chatAv').textContent=ini(username);
+  document.getElementById('chatName').textContent=username;
+  document.getElementById('chatWlt').textContent=sw(walletAddr);
+  document.getElementById('chatMsgs').innerHTML='<div style="text-align:center;color:var(--muted);font-size:.82rem;padding:2rem">Loading...</div>';
+  document.getElementById('chatWin').classList.add('on');
+  // Load conversation from backend
+  try{
+    const res=await fetch(API+'/api/messages/'+walletAddr,{headers:{'Authorization':'Bearer '+S.token}});
+    const j=await res.json();
+    const msgs=j.success?j.data:[];
+    document.getElementById('chatMsgs').innerHTML=msgs.length?msgs.map(m=>`<div class="bubble ${m.from===S.wallet?'b-out':'b-in'}">${m.text}<div class="b-time">${ago(m.createdAt)}</div></div>`).join(''):'<div style="text-align:center;color:var(--muted);font-size:.82rem;padding:2rem">Say hello! 👋</div>';
+    const el=document.getElementById('chatMsgs');el.scrollTop=el.scrollHeight;
+    document.getElementById('msgDot').classList.remove('on');
+  }catch(e){}
+  document.getElementById('chatInput').focus();
+}
+function closeChat(){document.getElementById('chatWin').classList.remove('on');loadInbox();}
+function appendChatBubble(msg,isOut){
+  const el=document.getElementById('chatMsgs');
+  const div=document.createElement('div');
+  div.className='bubble '+(isOut?'b-out':'b-in');
+  div.innerHTML=msg.text+'<div class="b-time">just now</div>';
+  el.appendChild(div);el.scrollTop=el.scrollHeight;
+}
+async function sendMsg(){
+  const inp=document.getElementById('chatInput');const txt=inp.value.trim();
+  if(!txt||!S.chatWith)return;
+  inp.value='';
+  appendChatBubble({text:txt},true);
+  try{
+    await fetch(API+'/api/messages',{method:'POST',headers:{'Content-Type':'application/json','Authorization':'Bearer '+S.token},body:JSON.stringify({to:S.chatWith.wallet,text:txt})});
+    loadInbox();
+  }catch(e){toast('Could not send message');}
+}
+
+// ════ EDIT PROFILE ════
+function openEditModal(){document.getElementById('eUser').value=S.username||'';document.getElementById('eBio').value=S.bio||'';document.getElementById('eX').value=S.xHandle||'';document.getElementById('eTg').value=S.tgHandle||'';document.getElementById('eGh').value=S.ghHandle||'';document.getElementById('editModal').classList.add('on');}
+function closeEditModal(){document.getElementById('editModal').classList.remove('on');}
+async function saveProfile(){
+  const username=document.getElementById('eUser').value.trim();
+  const bio=document.getElementById('eBio').value.trim();
+  const x=document.getElementById('eX').value.trim();
+  const tg=document.getElementById('eTg').value.trim();
+  const gh=document.getElementById('eGh').value.trim();
+  showConn(true);
+  try{
+    const res=await fetch(API+'/api/users/profile',{method:'PATCH',headers:{'Content-Type':'application/json','Authorization':'Bearer '+S.token},body:JSON.stringify({username,bio,avatar:JSON.stringify({x,tg,gh})})});
+    const j=await res.json();if(!j.success)throw new Error(j.message);
+    S.username=username||S.username;S.bio=bio;S.xHandle=x;S.tgHandle=tg;S.ghHandle=gh;
+    showConn(false);closeEditModal();updateMyProfile();toast('Profile updated!');
+  }catch(e){showConn(false);toast(e.message||'Could not save');}
+}
+
+// ════ PAGE NAV ════
+function showPage(p){
+  document.querySelectorAll('.page').forEach(el=>el.classList.remove('on'));
+  document.querySelectorAll('.bni').forEach(el=>el.classList.remove('on'));
+  document.getElementById('page-'+p)?.classList.add('on');
+  document.getElementById('bn-'+p)?.classList.add('on');
+  if(p==='me')updateMyProfile();
+  if(p==='lb')loadLeaderboard();
+  if(p==='messages'){renderMsgList();loadInbox();}
+  if(p==='feed')loadFeed();
+}
+
+// ════ ROUTING ════
+function checkRoute(){const hash=window.location.hash;if(hash.startsWith('#profile/')){const w=hash.replace('#profile/','');if(w)loadPublicProfile(w);}}
+window.addEventListener('hashchange',checkRoute);
+</script>
+</body>
+</html>
